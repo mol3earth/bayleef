@@ -1,7 +1,7 @@
-usgs
+Bayleef
 ====
 
-usgs is a Python library for interfacing with the US Geologic Survey's Inventory Service. The Inventory Service supports a variety of requests for accessing USGS datasets, including searching datasets, downloading data products, and accessing metadata on data products.
+Bayleef is a Python library for interfacing with the US Geologic Survey's Inventory Service. The Inventory Service supports a variety of requests for accessing USGS datasets, including searching datasets, downloading data products, and accessing metadata on data products.
 
 
 .. note:: All requests require an account with `USGS's EROS service <https://ers.cr.usgs.gov/register/>`_. The account must also have Machine to Machine privileges.
@@ -29,19 +29,19 @@ Python
 
 .. code-block:: python
 
-    from usgs import api
-    
+    from bayleef import api
+
     # Set the EarthExplorer catalog
     node = 'EE'
-    
+
     # Set the Hyperion and Landsat 8 dataset
     hyperion_dataset = 'EO1_HYP_PUB'
     landsat8_dataset = 'LANDSAT_8'
-    
+
     # Set the scene ids
     hyperion_scene_id = 'EO1H1820422014302110K2_SG1_01'
     landsat8_scene_id = 'LC80290462015135LGN00'
-    
+
     # Submit requests to USGS servers
     api.metadata(hyperion_dataset, node, [hyperion_scene_id])
     api.metadata(landsat8_dataset, node, [landsat8_scene_id])
@@ -52,7 +52,7 @@ Command Line
 
 .. code-block:: bash
 
-    $ usgs metadata --node EE EO1_HYP_PUB EO1H1820422014302110K2_SG1_01
+    $ bayleef metadata --node EE EO1_HYP_PUB EO1H1820422014302110K2_SG1_01
     {
       "errorCode": null,
       "executionTime": 1.6408669948578,
@@ -95,7 +95,7 @@ Command Line
       "api_version": "1.2.1",
       "error": ""
     }
-    
+
     $ usgs metadata --node EE LANDSAT_8 LC80290462015135LGN00
     {
       "errorCode": null,
@@ -164,7 +164,7 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-   
+
    reference/cli
    reference/api
    reference/payloads

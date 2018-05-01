@@ -3,19 +3,19 @@ from setuptools import setup, find_packages
 
 
 # Get the long description from the relevant file
-with codecs_open('README.rst', encoding='utf-8') as f:
+with codecs_open('README.MD', encoding='utf-8') as f:
     long_description = f.read()
 
 
 # Parse the version from the fiona/rasterio module.
-with open('usgs/__init__.py') as f:
+with open('bayleef/__init__.py') as f:
     for line in f:
         if line.find("__version__") >= 0:
             version = line.split("=")[1].strip()
             version = version.strip('"')
             version = version.strip("'")
             continue
-
+            
 
 setup(name='bayleef',
       version=version,
@@ -23,13 +23,13 @@ setup(name='bayleef',
       long_description=long_description,
       classifiers=[],
       keywords='',
-      author=u"Kelvin Rodriguez", u"Amit Kapadia",
-      author_email='krodriguez@usgs.gov,
+      author=u"Kelvin Rodriguez",
+      author_email='krodriguez@usgs.gov',
       url='https://github.com/kelvinrr/bayleef',
-      license='MIT',
+      license='ISC',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,
-      package_data={'usgs': ['data/datasets.json']},
+      package_data={'bayleef': ['data/datasets.json']},
       zip_safe=False,
       install_requires=[
           'click>=4.0',
@@ -41,6 +41,6 @@ setup(name='bayleef',
       },
       entry_points="""
       [console_scripts]
-      usgs=usgs.scripts.cli:usgs
+      bayleef=bayleef.scripts.cli:bayleef
       """
       )

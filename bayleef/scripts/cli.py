@@ -1,31 +1,43 @@
-
+import sys
 import os, json
 import click
-from usgs import api
+import logging
+import re
+import wget
+import tarfile
+from threading import Thread
 
+from bayleef import api
+from bayleef.util import get_path
+
+
+LOG_FORMAT = '%(asctime)-15s |_| %(message)s'
+logging.basicConfig(format=LOG_FORMAT)
+logger = logging.getLogger('bayleef-cli')
+logger.setLevel(logging.INFO)
 
 def get_node(dataset, node):
     """
     .. todo:: Move to more appropriate place in module.
     """
-    
+
     if node is None:
-        
+
         cur_dir = os.path.dirname(os.path.realpath(__file__))
         data_dir = os.path.join(cur_dir, "..", "data")
         dataset_path = os.path.join(data_dir, "datasets.json")
-        
+
         with open(dataset_path, "r") as f:
             datasets = json.loads(f.read())
-        
+
         node = datasets[dataset].upper()
-    
+
     return node
 
 
 def to_coordinates(bounds):
     xmin, ymin, xmax, ymax = bounds
-    
+
     return [[
         [xmin, ymin],
         [xmin, ymax],
@@ -84,6 +96,7 @@ def explode(coords):
             for f in explode(e):
                 yield f
 
+
 def get_bbox(f):
     x, y = zip(*list(explode(f['geometry']['coordinates'])))
     return min(x), min(y), max(x), max(y)
@@ -94,7 +107,7 @@ node_opt = click.option("--node", help="The node corresponding to the dataset (C
 
 
 @click.group()
-def usgs():
+def bayleef():
     pass
 
 
@@ -156,32 +169,32 @@ def dataset_fields(dataset, node):
 @click.argument("aoi", default="-", required=False)
 @click.option("--start-date")
 @click.option("--end-date")
-@click.option("--longitude")
-@click.option("--latitude")
-@click.option("--distance", help="Radius - in units of meters - used to search around the specified longitude/latitude.", default=100)
+@click.option("--lng")
+@click.option("--lat")
+@click.option("--dist", help="Radius - in units of meters - used to search around the specified longitude/latitude.", default=100)
 @click.option("--lower-left", nargs=2, help="Longitude/latitude specifying the lower left of the search window")
 @click.option("--upper-right", nargs=2, help="Longitude/latitude specifying the lower left of the search window")
 @click.option("--where", nargs=2, multiple=True, help="Supply additional search criteria.")
 @click.option('--geojson', is_flag=True)
 @click.option("--extended", is_flag=True, help="Probe for more metadata.")
 @api_key_opt
-def search(dataset, node, aoi, start_date, end_date, longitude, latitude, distance, lower_left, upper_right, where, geojson, extended, api_key):
+def search(dataset, node, aoi, start_date, end_date, lng, lat, dist, lower_left, upper_right, where, geojson, extended, api_key):
 
     node = get_node(dataset, node)
-    
+
     if aoi == "-":
         src = click.open_file('-')
         if not src.isatty():
             lines = src.readlines()
-            
+
             if len(lines) > 0:
-                
+
                 aoi = json.loads(''.join([ line.strip() for line in lines ]))
-            
+
                 bbox = map(get_bbox, aoi.get('features') or [aoi])[0]
                 lower_left = bbox[0:2]
                 upper_right = bbox[2:4]
-    
+
     if where:
         # Query the dataset fields endpoint for queryable fields
         resp = api.dataset_fields(dataset, node)
@@ -193,15 +206,15 @@ def search(dataset, node, aoi, start_date, end_date, longitude, latitude, distan
         where = { field_lut[format_fieldname(k)]: v for k, v in where if format_fieldname(k) in field_lut }
 
     if lower_left:
-        lower_left = dict(zip(['longitude', 'latitude'], lower_left))
-        upper_right = dict(zip(['longitude', 'latitude'], upper_right))
+        lower_left = dict(zip(['lng', 'lat'], lower_left))
+        upper_right = dict(zip(['lng', 'lat'], upper_right))
 
-    result = api.search(dataset, node, lat=latitude, lng=longitude, distance=distance, ll=lower_left, ur=upper_right, start_date=start_date, end_date=end_date, where=where, extended=extended, api_key=api_key)
+    result = api.search(dataset, node, lat=lat, lng=lng, distance=dist, ll=lower_left, ur=upper_right, start_date=start_date, end_date=end_date, where=where, extended=extended, api_key=api_key)
 
     if geojson:
         result = to_geojson(result)
 
-    print(json.dumps(result))
+    print(result)
 
 
 @click.command()
@@ -210,9 +223,8 @@ def search(dataset, node, aoi, start_date, end_date, longitude, latitude, distan
 @node_opt
 @api_key_opt
 def download_options(dataset, scene_ids, node, api_key):
-    
     node = get_node(dataset, node)
-    
+
     data = api.download_options(dataset, node, scene_ids)
     print(json.dumps(data))
 
@@ -224,18 +236,63 @@ def download_options(dataset, scene_ids, node, api_key):
 @node_opt
 @api_key_opt
 def download_url(dataset, scene_ids, product, node, api_key):
-    
     node = get_node(dataset, node)
-    
+
     data = api.download(dataset, node, scene_ids, product)
     click.echo(json.dumps(data))
 
 
-usgs.add_command(login)
-usgs.add_command(logout)
-usgs.add_command(datasets)
-usgs.add_command(dataset_fields, "dataset-fields")
-usgs.add_command(metadata)
-usgs.add_command(search)
-usgs.add_command(download_options, "download-options")
-usgs.add_command(download_url, "download-url")
+@click.command()
+@click.argument("root")
+def batch_download(root):
+    def download_from_result(scene, root):
+        scene_id = scene['entityId']
+        temp_file = '{}.tar.gz'.format(scene_id)
+
+        path = get_path(scene, root, 'landsat8')
+        if os.path.exists(path):
+            logger.warning('{} already in cache, skipping'.format(path))
+            return
+
+        download_info = api.download('LANDSAT_8_C1', 'EE', scene_id)
+        download_url = download_info['data'][0]
+
+        logger.info('Downloading: {} from {}'.format(scene_id, download_url))
+        wget.download(download_url, temp_file)
+
+        logger.info('Extracting to {}'.format(path))
+        tar = tarfile.open(temp_file)
+        tar.extractall(path=path)
+        tar.close()
+        logger.info('Removing {}'.format(temp_file))
+        os.remove(temp_file)
+        logger.info('{} complete'.format(scene_id))
+
+
+    # get pipped in response
+    resp = ""
+    for line in sys.stdin:
+        resp += line
+
+    # convert string into dict
+    resp = eval(resp)
+    results = resp['data']['results']
+
+    for result in results:
+        # Run Downloads as threads so they keyboard interupts are
+        # deferred until download is complaete
+        job = Thread(target=download_from_result, args=(result, root))
+        job.start()
+        job.join()
+
+
+
+bayleef.add_command(login)
+bayleef.add_command(logout)
+bayleef.add_command(datasets)
+bayleef.add_command(dataset_fields, "dataset-fields")
+bayleef.add_command(metadata)
+bayleef.add_command(search)
+bayleef.add_command(download_options, "download-options")
+bayleef.add_command(download_url, "download-url")
+bayleef.add_command(batch_download, "batch-download")
