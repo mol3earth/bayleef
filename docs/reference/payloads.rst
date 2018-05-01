@@ -1,9 +1,9 @@
-.. module:: usgs
+.. module:: bayleef
 
 .. payloads:
 
-USGS Payloads
+BAYLEEF Payloads
 =============
 
-.. automodule:: usgs.payloads
+.. automodule:: bayleef.payloads
 	:members:

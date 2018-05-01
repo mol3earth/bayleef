@@ -1,4 +1,4 @@
-.. module:: usgs
+.. module:: bayleef
 
 .. api:
 
@@ -13,7 +13,7 @@ The ``where`` parameter used for searching a USGS dataset is best understood by 
 .. code-block:: python
 
 
-    from usgs import api
+    from bayleef import api
 
 
     def submit_where_query():

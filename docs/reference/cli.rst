@@ -1,8 +1,8 @@
-.. module:: usgs.scripts
+.. module:: bayleef.scripts
 
 .. cli:
 
-USGS CLI
+BAYLEEF CLI
 ========
 
 This library comes with a command line interface to expose many common requests, such as authenticating, searching, downloading, and obtaining metadata.
@@ -11,7 +11,7 @@ Here's an example of what can be done using the cli and GitHub Gists.
 
 .. code-block:: bash
 
-    usgs search --node EE EO1_HYP_PUB --start-date 20150401 --end-date 20150501 --geojson | gist -f hyperion-20150401-20150501.geojson
+    bayleef search --node EE EO1_HYP_PUB --start-date 20150401 --end-date 20150501 --geojson | gist -f hyperion-20150401-20150501.geojson
 
 .. raw:: html
 
@@ -25,44 +25,44 @@ Login
 
 .. code-block:: bash
 
-    usgs login [USGS username] [USGS password]
+    bayleef login [USGS username] [USGS password]
 
 Logout
 ------
 
 .. code-block:: bash
 
-    usgs logout [USGS username] [USGS password]
+    bayleef logout [USGS username] [USGS password]
 
 Search
 ------
 
 .. code-block:: bash
 
-    usgs search [dataset] --start-date [start date] --end-date [end date] --longitude [lng] --latitude [lat] --node [node]
+    bayleef search [dataset] --start-date [start date] --end-date [end date] --longitude [lng] --latitude [lat] --node [node]
 
-Suppose you're interested in declassified satellite imagery. The datasets ``CORONA2`` or ``DECLASSII`` can be queried. If you have a GeoJSON file with an AOI, you can pipe the file to ``usgs search``.
+Suppose you're interested in declassified satellite imagery. The datasets ``CORONA2`` or ``DECLASSII`` can be queried. If you have a GeoJSON file with an AOI, you can pipe the file to ``search``.
 
 .. code-block:: bash
 
-    cat chile.geojson | usgs search --node EE DECLASSII --start-date 19700101 --end-date 19800101 --geojson | gist -f declassii-chile-1970s.geojson
+    cat chile.geojson | bayleef search --node EE DECLASSII --start-date 19700101 --end-date 19800101 --geojson | gist -f declassii-chile-1970s.geojson
 
 .. raw:: html
 
     <div style="margin-top:10px; margin-bottom:20px">
       <iframe class='ghmap' width="640" height="400" src="https://render.githubusercontent.com/view/geojson/?url=https%3A%2F%2Fgist.githubusercontent.com%2Fkapadia%2Ffd15d4082da2ec47dbc5%2Fraw%2Fdeclassii-chile-1970s.geojson#08b6ad6d-046d-4fac-9ada-553356358235" frameborder="0"></iframe>
     </div>
-    
+
     <script>
     window.onresize = function(e) {
       var mainEl = document.querySelector('div[role="main"]');
-      
+
       var mapElems = document.querySelectorAll('.ghmap');
       for (var i = 0; i < mapElems.length; i++) {
         mapElems[i].width = mainEl.clientWidth;
       }
     }
-    
+
     window.onresize();
     </script>
 
@@ -72,13 +72,13 @@ Metadata
 
 .. code-block:: bash
 
-    usgs metadata [dataset] [entity/scene id 1] [entity/scene id 2] ... [entity/scene id n]
+    bayleef metadata [dataset] [entity/scene id 1] [entity/scene id 2] ... [entity/scene id n]
 
 Suppose you want metadata from a couple scenes taken by Hyperion.
 
 .. code-block:: bash
 
-    $ usgs metadata --node EE EO1_HYP_PUB EO1H1820422014302110K2_SG1_01 EO1H1830422015093110KF_TR2_01 | jq ""
+    $ bayleef metadata --node EE EO1_HYP_PUB EO1H1820422014302110K2_SG1_01 EO1H1830422015093110KF_TR2_01 | jq ""
     {
       "errorCode": null,
       "executionTime": 1.676698923111,
@@ -160,7 +160,7 @@ Unfortunately, this is not all the metadata available for each scene. More metad
 
 .. code-block:: bash
 
-    $ usgs metadata --node EE EO1_HYP_PUB EO1H1820422014302110K2_SG1_01 EO1H1830422015093110KF_TR2_01 --extended | jq ""
+    $ bayleef metadata --node EE EO1_HYP_PUB EO1H1820422014302110K2_SG1_01 EO1H1830422015093110KF_TR2_01 --extended | jq ""
     {
       "errorCode": null,
       "executionTime": 1.5633571147919,
@@ -317,14 +317,14 @@ Unfortunately, this is not all the metadata available for each scene. More metad
 
 Download Options
 ----------------
-  
+
 .. code-block:: bash
 
-    usgs download-options [dataset] [entity/scene id] --node [node]
+    bayleef download-options [dataset] [entity/scene id] --node [node]
 
 Download URL
 ------------
-    
+
 .. code-block:: bash
 
-    usgs download-url [dataset] [entity/scene id] --node [node] --product [product]
+    bayleef download-url [dataset] [entity/scene id] --node [node] --product [product]

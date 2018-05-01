@@ -1,5 +1,5 @@
 Bayleef
-====
+=======
 
 Bayleef is a Python library for interfacing with the US Geologic Survey's Inventory Service. The Inventory Service supports a variety of requests for accessing USGS datasets, including searching datasets, downloading data products, and accessing metadata on data products.
 
@@ -15,7 +15,7 @@ Installation
 
 .. code-block:: bash
 
-    pip install usgs
+    pip install bayleef
 
 
 Examples
@@ -96,7 +96,7 @@ Command Line
       "error": ""
     }
 
-    $ usgs metadata --node EE LANDSAT_8 LC80290462015135LGN00
+    $ bayleef metadata --node EE LANDSAT_8 LC80290462015135LGN00
     {
       "errorCode": null,
       "executionTime": 1.7327969074249,
