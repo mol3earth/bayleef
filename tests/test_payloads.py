@@ -3,7 +3,7 @@ import json
 import pytest
 import unittest
 
-from usgs import payloads
+from bayleef import payloads
 
 
 def compare_json(s1, s2):

@@ -5,8 +5,8 @@ from xml.etree import ElementTree
 import requests
 from requests_futures.sessions import FuturesSession
 
-from usgs import USGS_API, USGSError
-from usgs import xsi, payloads
+from bayleef import USGS_API, USGSError
+from bayleef import xsi, payloads
 
 
 TMPFILE = os.path.join(expanduser("~"), ".usgs")

@@ -1,7 +1,7 @@
 import pytest
 import mock
 
-from usgs import api
+from bayleef import api
 from .MockPost import MockPost
 
 
@@ -130,4 +130,3 @@ def test_search():
     data = response['data']
     for key in expected_keys:
         assert key in data
-

@@ -17,15 +17,15 @@ with open('usgs/__init__.py') as f:
             continue
 
 
-setup(name='usgs',
+setup(name='bayleef',
       version=version,
-      description=u"Access the USGS inventory service",
+      description=u"Pythonic interface for planetary spice services.",
       long_description=long_description,
       classifiers=[],
       keywords='',
-      author=u"Amit Kapadia",
-      author_email='amit@planet.com',
-      url='https://github.com/kapadia/usgs',
+      author=u"Kelvin Rodriguez", u"Amit Kapadia",
+      author_email='krodriguez@usgs.gov,
+      url='https://github.com/kelvinrr/bayleef',
       license='MIT',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,

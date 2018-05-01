@@ -1,7 +1,7 @@
 
 import os
 import json
-from usgs import api
+from bayleef import api
 
 testdir = os.path.dirname(os.path.abspath(__file__))
 

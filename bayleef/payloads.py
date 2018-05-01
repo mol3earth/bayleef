@@ -1,17 +1,17 @@
 
 
 import json
-from usgs import CATALOG_NODES, USGSDependencyRequired
+from bayleef import CATALOG_NODES, USGSDependencyRequired
 
 
 def clear_bulk_download_order(dataset, node, api_key=None):
     """
     This method is used to clear bulk download order information from the item basket.
-    
+
     :param dataset:
-    
+
     :param node:
-    
+
     :param api_key:
         API key is required.
     """
@@ -21,11 +21,11 @@ def clear_bulk_download_order(dataset, node, api_key=None):
 def clear_order(dataset, node, api_key=None):
     """
     This method is used to clear order information from the item basket.
-    
+
     :param dataset:
-    
+
     :param node:
-    
+
     :param api_key:
         API key is required.
     """
@@ -38,11 +38,11 @@ def dataset_fields(dataset, node, api_key=None):
     fields for the specified dataset. These values can
     be used as additional criteria when submitting search
     and hit queries.
-    
+
     :param dataset:
-    
+
     :param node:
-    
+
     :param api_key:
         API key is not required.
     """
@@ -59,42 +59,42 @@ def datasets(dataset, node, ll=None, ur=None, start_date=None, end_date=None, ap
     This method is used to find datasets available for searching.
     By passing no parameters except node, all available datasets
     are returned. Additional parameters such as temporal range
-    and spatial bounding box can be used to find datasets that 
+    and spatial bounding box can be used to find datasets that
     provide more specific data. The dataset name parameter can
     be used to limit the results based on matching the supplied
     value against the dataset name with assumed wildcards at the
-    beginning and end. All parameters are optional except for 
+    beginning and end. All parameters are optional except for
     the 'node' parameter.
-    
+
     :param dataset:
         Dataset Identifier
-    
+
     :param ll:
         Lower left corner of an AOI bounding box - in decimal form
         Longitude/Latitude dictionary
-        
+
         e.g. { "longitude": 0.0, "latitude": 0.0 }
-    
+
     :param ur:
         Upper right corner of an AOI bounding box - in decimal form
         Longitude/Latitude dictionary
-        
+
         e.g. { "longitude": 0.0, "latitude": 0.0 }
-    
+
     :param start_date:
         Used for searching scene acquisition - will accept anything
         that the PHP strtotime function can understand
-    
+
     :param end_date:
         Used for searching scene acquisition - will accept anything
         that the PHP strtotime function can understand
-    
+
     :param node:
         The requested Catalog
-    
+
     :param api_key:
         API key is not required.
-        
+
     """
 
     payload = {
@@ -127,17 +127,17 @@ def datasets(dataset, node, ll=None, ur=None, start_date=None, end_date=None, ap
 def download(dataset, node, entityids, products, api_key=None):
     """
     The use of this request will be to obtain valid data download URLs.
-    
+
     :param dataset:
-    
+
     :param entityIds:
         list
-    
+
     :param products:
         list
-    
+
     :param node:
-    
+
     :param api_key:
         API key is required.
     """
@@ -159,13 +159,13 @@ def download_options(dataset, node, entityids, api_key=None):
     options for each scene. Some download options may exist but still be unavailable
     due to disk usage and many other factors. If a download is unavailable
     it may need to be ordered.
-    
+
     :param dataset:
-    
+
     :param node:
-    
+
     :param entityIds:
-    
+
     :param api_key:
         API key is not required.
     """
@@ -234,9 +234,9 @@ def login(username, password):
     destroyed upon final use of the service by calling the logout
     method. Users must have "Machine to Machine" access based on
     a user-based role in the users profile.
-    
+
     :param username:
-    
+
     :param password:
     """
 
@@ -251,7 +251,7 @@ def login(username, password):
 def logout(api_key):
     """
     Remove the users API key from being used in the future.
-    
+
     :param api_key:
         API key is required.
     """
@@ -267,13 +267,13 @@ def metadata(dataset, node, entityids, api_key=None):
     The use of the metadata request is intended for those who have
     acquired scene IDs from a different source. It will return the
     same metadata that is available via the search request.
-    
+
     :param dataset:
-    
+
     :param node:
-    
+
     :param sceneid:
-    
+
     :param api_key:
     """
 
@@ -307,32 +307,32 @@ def search(dataset, node,
     api_key=None):
     """
     :param dataset:
-    
+
     :param node:
-    
+
     :param lat:
-    
+
     :param lng:
-    
+
     :param ll:
-    
+
     :param distance:
-    
+
     :param ur:
-    
+
     :param start_date:
-    
+
     :param end_date:
-    
+
     :param where:
         Specify additional search criteria
-    
+
     :param max_results:
-    
+
     :param starting_number:
-    
+
     :param sort_order:
-    
+
     :param api_key:
         API key is not required.
     """
@@ -385,7 +385,7 @@ def search(dataset, node,
                     "value": value,
                     "operand": "="
                 }
-                for field_id, value in where.iteritems()
+                for field_id, value in where.items()
             ]
         }
 
