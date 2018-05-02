@@ -5,18 +5,23 @@ import logging
 import re
 import wget
 import tarfile
+
 from threading import Thread
+from glob import glob
+from sqlalchemy import create_engine
+from sqlalchemy.exc import IntegrityError
 
 from bayleef import api
-from bayleef.util import get_path
+from bayleef.utils import get_path
+from bayleef.sql import func_map
 
 
-LOG_FORMAT = '%(asctime)-15s |_| %(message)s'
+LOG_FORMAT = '%(asctime)-15s ->> %(message)s'
 logging.basicConfig(format=LOG_FORMAT)
 logger = logging.getLogger('bayleef-cli')
 logger.setLevel(logging.INFO)
 
-def get_node(dataset, node):
+def get_node(dataset, node=None):
     """
     .. todo:: Move to more appropriate place in module.
     """
@@ -195,9 +200,6 @@ def search(dataset, node, aoi, start_date, end_date, lng, lat, dist, lower_left,
                 lower_left = bbox[0:2]
                 upper_right = bbox[2:4]
 
-                print(lower_left)
-                print(upper_right)
-
     if where:
         # Query the dataset fields endpoint for queryable fields
         resp = api.dataset_fields(dataset, node)
@@ -248,22 +250,26 @@ def download_url(dataset, scene_ids, product, node, api_key):
 
 @click.command()
 @click.argument("root")
+@node_opt
 def batch_download(root):
     def download_from_result(scene, root):
         scene_id = scene['entityId']
         temp_file = '{}.tar.gz'.format(scene_id)
 
-        path = get_path(scene, root, 'landsat8')
+        dataset = re.findall(r'dataset_name=[A-Z0-9_]*', scene['orderUrl'])[0]
+        dataset = dataset.split('=')[1]
+
+        path = get_path(scene, root, dataset)
         if os.path.exists(path):
             logger.warning('{} already in cache, skipping'.format(path))
             return
 
-        download_info = api.download('LANDSAT_8_C1', 'EE', scene_id)
+        download_info = api.download(dataset, get_node(dataset, node), scene_id)
         download_url = download_info['data'][0]
 
         logger.info('Downloading: {} from {}'.format(scene_id, download_url))
         wget.download(download_url, temp_file)
-
+        print()
         logger.info('Extracting to {}'.format(path))
         tar = tarfile.open(temp_file)
         tar.extractall(path=path)
@@ -291,7 +297,41 @@ def batch_download(root):
         job.join()
 
 
+@click.command()
+@click.argument("dataset")
+@click.argument("root")
+@click.argument("db")
+@click.option("--host", default="localhost")
+@click.option("--port", default="5432")
+@click.option("--user")
+@click.option("--password")
+def to_sql(db, dataset, root, host, port, user, password):
+    if not dataset in func_map.keys():
+        logger.error("{} is not a valid dataset".format(dataset))
 
+    dataset_root = os.path.join(root, dataset)
+
+    # The dirs with important files will always be in leaf nodes
+    leaf_dirs = list()
+    for root, dirs, files in os.walk(dataset_root):
+        if files and [f for f in files if not f.startswith('.')]:
+            leaf_dirs.append(root)
+
+    if not leaf_dirs:
+        logger.error("No files were found in {}".format(dataset_root))
+
+
+    # only suppoort postgres for now
+    engine = create_engine('postgresql://{}:{}@{}:{}/{}'.format(user,password,host,port,db))
+    for dir in leaf_dirs:
+        logger.info("Uploading {}".format(dir))
+        try:
+            func_map[dataset](dir, engine)
+        except Exception as e:
+            logger.error("{}".format(e))
+
+
+bayleef.add_command(to_sql, "to-sql")
 bayleef.add_command(login)
 bayleef.add_command(logout)
 bayleef.add_command(datasets)

@@ -9,7 +9,7 @@ https://kelvinrr.github.io/bayleef/
 ## Example
 
 ```
-# Get all night time images given a bounding box and time series
+# Get night time Landsat 8 images given a bounding box and time range
 bayleef search LANDSAT_8_C1 --lower-left -165 15 --upper-right -150.0 28.0 --start-date 2013-04-01 --end-date 2013-05-1 where 20513 Night --geojson
 ```
 

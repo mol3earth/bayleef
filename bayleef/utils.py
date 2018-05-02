@@ -6,6 +6,8 @@ from datetime import datetime
 
 
 def get_path(response, root, dataset):
+    """
+    """
     if isinstance(response, dict):
         response = [response]
 
@@ -21,3 +23,21 @@ def get_path(response, root, dataset):
 
     except Exception as e:
         print('Failed to process request: {}'.format(e))
+
+
+def keys_to_lower(dictionary):
+    """
+    """
+    for key in dictionary.keys():
+        if isinstance(dictionary[key], dict):
+            keys_to_lower(dictionary[key])
+        dictionary[key.lower()] = dictionary.pop(key)
+
+
+def apply_dict(dictionary, func, *args, **kwargs):
+    """
+    """
+    for key in dictionary.keys():
+        if isinstance(dictionary[key], dict):
+            apply_dict(dictionary[key], func)
+        dictionary[key] = func(dictionary[key], *args, **kwargs)
