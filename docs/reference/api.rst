@@ -2,7 +2,7 @@
 
 .. api:
 
-USGS API
+BAYLEEF API
 =============
 
 Examples
@@ -37,5 +37,5 @@ The ``where`` parameter used for searching a USGS dataset is best understood by 
             print scene
 
 
-.. automodule:: usgs.api
+.. automodule:: bayleef.api
 	:members:
