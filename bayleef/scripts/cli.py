@@ -50,7 +50,7 @@ def to_coordinates(bounds):
 def to_geojson_feature(entry):
 
     # TODO: This key may not be present in all datasets.
-    bounds = map(float, entry.pop("sceneBounds").split(','))
+    bounds = list(map(float, entry.pop("sceneBounds").split(',')))
 
     coordinates = to_coordinates(bounds)
 
@@ -70,9 +70,9 @@ def to_geojson(result):
     }
 
     if type(result['data']) is list:
-        features = map(to_geojson_feature, result['data'])
+        features = list(map(to_geojson_feature, result['data']))
     else:
-        features = map(to_geojson_feature, result['data']['results'])
+        features = list(map(to_geojson_feature, result['data']['results']))
         for key in result['data']:
             if key == "results":
                 continue
@@ -195,6 +195,9 @@ def search(dataset, node, aoi, start_date, end_date, lng, lat, dist, lower_left,
                 lower_left = bbox[0:2]
                 upper_right = bbox[2:4]
 
+                print(lower_left)
+                print(upper_right)
+
     if where:
         # Query the dataset fields endpoint for queryable fields
         resp = api.dataset_fields(dataset, node)
@@ -205,16 +208,17 @@ def search(dataset, node, aoi, start_date, end_date, lng, lat, dist, lower_left,
         field_lut = { format_fieldname(field['name']): field['fieldId'] for field in resp['data'] }
         where = { field_lut[format_fieldname(k)]: v for k, v in where if format_fieldname(k) in field_lut }
 
+
     if lower_left:
-        lower_left = dict(zip(['lng', 'lat'], lower_left))
-        upper_right = dict(zip(['lng', 'lat'], upper_right))
+        lower_left = dict(zip(['longitude', 'latitude'], lower_left))
+        upper_right = dict(zip(['longitude', 'latitude'], upper_right))
 
     result = api.search(dataset, node, lat=lat, lng=lng, distance=dist, ll=lower_left, ur=upper_right, start_date=start_date, end_date=end_date, where=where, extended=extended, api_key=api_key)
 
     if geojson:
         result = to_geojson(result)
 
-    print(result)
+    print(json.dumps(result))
 
 
 @click.command()
@@ -275,7 +279,8 @@ def batch_download(root):
         resp += line
 
     # convert string into dict
-    resp = eval(resp)
+    resp = json.loads(resp)
+    logger.info("Number of files: {}".format(resp['data']['numberReturned']))
     results = resp['data']['results']
 
     for result in results:
