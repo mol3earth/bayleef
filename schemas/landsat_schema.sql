@@ -22,25 +22,17 @@ SET row_security = off;
 CREATE SCHEMA tiger;
 
 
-ALTER SCHEMA tiger OWNER TO kelvin;
-
 --
 -- Name: tiger_data; Type: SCHEMA; Schema: -; Owner: kelvin
 --
 
 CREATE SCHEMA tiger_data;
 
-
-ALTER SCHEMA tiger_data OWNER TO kelvin;
-
 --
 -- Name: topology; Type: SCHEMA; Schema: -; Owner: kelvin
 --
 
 CREATE SCHEMA topology;
-
-
-ALTER SCHEMA topology OWNER TO kelvin;
 
 --
 -- Name: SCHEMA topology; Type: COMMENT; Schema: -; Owner: kelvin
@@ -182,8 +174,6 @@ CREATE TABLE landsat8.images (
 );
 
 
-ALTER TABLE landsat8.images OWNER TO kelvin;
-
 --
 -- Name: metadata_file_info; Type: TABLE; Schema: public; Owner: kelvin
 --
@@ -199,8 +189,6 @@ CREATE TABLE landsat8.metadata_file_info (
     station_id text
 );
 
-
-ALTER TABLE landsat8.metadata_file_info OWNER TO kelvin;
 
 --
 -- Name: min_max_pixel_value; Type: TABLE; Schema: public; Owner: kelvin
@@ -233,8 +221,6 @@ CREATE TABLE landsat8.min_max_pixel_value (
 );
 
 
-ALTER TABLE landsat8.min_max_pixel_value OWNER TO kelvin;
-
 --
 -- Name: min_max_radiance; Type: TABLE; Schema: public; Owner: kelvin
 --
@@ -266,8 +252,6 @@ CREATE TABLE landsat8.min_max_radiance (
 );
 
 
-ALTER TABLE landsat8.min_max_radiance OWNER TO kelvin;
-
 --
 -- Name: min_max_reflectance; Type: TABLE; Schema: public; Owner: kelvin
 --
@@ -294,8 +278,6 @@ CREATE TABLE landsat8.min_max_reflectance (
     reflectance_minimum_band_9 double precision
 );
 
-
-ALTER TABLE landsat8.min_max_reflectance OWNER TO kelvin;
 
 --
 -- Name: product_metadata; Type: TABLE; Schema: public; Owner: kelvin
@@ -359,8 +341,6 @@ CREATE TABLE landsat8.product_metadata (
 );
 
 
-ALTER TABLE landsat8.product_metadata OWNER TO kelvin;
-
 --
 -- Name: projection_parameters; Type: TABLE; Schema: public; Owner: kelvin
 --
@@ -378,8 +358,6 @@ CREATE TABLE landsat8.projection_parameters (
     utm_zone bigint
 );
 
-
-ALTER TABLE landsat8.projection_parameters OWNER TO kelvin;
 
 --
 -- Name: radiometric_rescaling; Type: TABLE; Schema: public; Owner: kelvin
@@ -430,8 +408,6 @@ CREATE TABLE landsat8.radiometric_rescaling (
 );
 
 
-ALTER TABLE landsat8.radiometric_rescaling OWNER TO kelvin;
-
 --
 -- Name: tirs_thermal_constants; Type: TABLE; Schema: public; Owner: kelvin
 --
@@ -444,8 +420,6 @@ CREATE TABLE landsat8.tirs_thermal_constants (
     landsat_scene_id text NOT NULL
 );
 
-
-ALTER TABLE landsat8.tirs_thermal_constants OWNER TO kelvin;
 
 --
 -- Name: image_attributes image_attributes_pkey; Type: CONSTRAINT; Schema: public; Owner: kelvin
