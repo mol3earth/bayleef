@@ -15,11 +15,11 @@ with open('bayleef/__init__.py') as f:
             version = version.strip('"')
             version = version.strip("'")
             continue
-            
+
 
 setup(name='bayleef',
       version=version,
-      description=u"Pythonic interface for planetary spice services.",
+      description=u"Pythonic interface for planetary services.",
       long_description=long_description,
       classifiers=[],
       keywords='',

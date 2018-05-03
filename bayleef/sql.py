@@ -16,7 +16,7 @@ from bayleef.utils import keys_to_lower
 from bayleef.utils import apply_dict
 
 
-def landsat8_to_sql(folder, engine):
+def landsat_8_c1_to_sql(folder, engine):
     """
     """
     try:
@@ -57,7 +57,7 @@ def landsat8_to_sql(folder, engine):
         metadata[key]['landsat_scene_id'] = pk
         df = gpd.GeoDataFrame(metadata[key], index=[0])
 
-        df.to_sql(key, engine, index=False, if_exists='append')
+        df.to_sql(key, engine, index=False, schema='landsat_8_c1', if_exists='append')
 
     # Get spatiotemporal data
     pm = metadata['product_metadata']
@@ -88,12 +88,11 @@ def landsat8_to_sql(folder, engine):
         'metafile' : metafile,
         'ang' : ang
     }
-    gpd.GeoDataFrame(image_record, index=[0]).to_sql('images', engine, if_exists='append', index=False,
+    gpd.GeoDataFrame(image_record, index=[0]).to_sql('images', engine, schema='landsat_8_c1', if_exists='append', index=False,
                                                         dtype={'geom': Geometry('POLYGON', srid=4326)})
 
 
 
 func_map = {
-    'LANDSAT_8' : landsat8_to_sql,
-    'LANDSAT_8_C1' : landsat8_to_sql
+    'LANDSAT_8_C1' : landsat_8_c1_to_sql
 }

@@ -251,7 +251,7 @@ def download_url(dataset, scene_ids, product, node, api_key):
 @click.command()
 @click.argument("root")
 @node_opt
-def batch_download(root):
+def batch_download(root, node):
     def download_from_result(scene, root):
         scene_id = scene['entityId']
         temp_file = '{}.tar.gz'.format(scene_id)
@@ -317,9 +317,7 @@ def to_sql(db, dataset, root, host, port, user, password):
         if files and [f for f in files if not f.startswith('.')]:
             leaf_dirs.append(root)
 
-    if not leaf_dirs:
-        logger.error("No files were found in {}".format(dataset_root))
-
+    logger.info("{} Folders found".format(len(leaf_dirs)))
 
     # only suppoort postgres for now
     engine = create_engine('postgresql://{}:{}@{}:{}/{}'.format(user,password,host,port,db))

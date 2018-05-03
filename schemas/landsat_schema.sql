@@ -115,13 +115,13 @@ SET default_tablespace = '';
 
 SET default_with_oids = false;
 
-CREATE SCHEMA landsat8;
+CREATE SCHEMA landsat_8_c1;
 
 --
 -- Name: image_attributes; Type: TABLE; Schema: public; Owner: kelvin
 --
 
-CREATE TABLE landsat8.image_attributes (
+CREATE TABLE landsat_8_c1.image_attributes (
     cloud_cover bigint,
     cloud_cover_land bigint,
     earth_sun_distance double precision,
@@ -147,16 +147,15 @@ CREATE TABLE landsat8.image_attributes (
 );
 
 
-ALTER TABLE landsat8.image_attributes;
 
 --
 -- Name: images; Type: TABLE; Schema: public; Owner: kelvin
 --
 
-CREATE TABLE landsat8.images (
+CREATE TABLE landsat_8_c1.images (
     landsat_scene_id text NOT NULL,
-    geom landsat8.geometry(Geometry,4326) NOT NULL,
-    "time" date NOT NULL
+    geom public.geometry(Geometry,4326) NOT NULL,
+    "time" date NOT NULL,
     b1 text,
     b2 text,
     b3 text,
@@ -178,7 +177,7 @@ CREATE TABLE landsat8.images (
 -- Name: metadata_file_info; Type: TABLE; Schema: public; Owner: kelvin
 --
 
-CREATE TABLE landsat8.metadata_file_info (
+CREATE TABLE landsat_8_c1.metadata_file_info (
     collection_number bigint,
     file_date text,
     landsat_product_id text,
@@ -189,12 +188,11 @@ CREATE TABLE landsat8.metadata_file_info (
     station_id text
 );
 
-
 --
 -- Name: min_max_pixel_value; Type: TABLE; Schema: public; Owner: kelvin
 --
 
-CREATE TABLE landsat8.min_max_pixel_value (
+CREATE TABLE landsat_8_c1.min_max_pixel_value (
     landsat_scene_id text NOT NULL,
     quantize_cal_max_band_1 bigint,
     quantize_cal_max_band_10 bigint,
@@ -225,7 +223,7 @@ CREATE TABLE landsat8.min_max_pixel_value (
 -- Name: min_max_radiance; Type: TABLE; Schema: public; Owner: kelvin
 --
 
-CREATE TABLE landsat8.min_max_radiance (
+CREATE TABLE landsat_8_c1.min_max_radiance (
     landsat_scene_id text NOT NULL,
     radiance_maximum_band_1 double precision,
     radiance_maximum_band_10 double precision,
@@ -256,7 +254,7 @@ CREATE TABLE landsat8.min_max_radiance (
 -- Name: min_max_reflectance; Type: TABLE; Schema: public; Owner: kelvin
 --
 
-CREATE TABLE landsat8.min_max_reflectance (
+CREATE TABLE landsat_8_c1.min_max_reflectance (
     landsat_scene_id text NOT NULL,
     reflectance_maximum_band_1 double precision,
     reflectance_maximum_band_2 double precision,
@@ -283,7 +281,7 @@ CREATE TABLE landsat8.min_max_reflectance (
 -- Name: product_metadata; Type: TABLE; Schema: public; Owner: kelvin
 --
 
-CREATE TABLE landsat8.product_metadata (
+CREATE TABLE landsat_8_c1.product_metadata (
     angle_coefficient_file_name text,
     bpf_name_oli text,
     bpf_name_tirs text,
@@ -345,7 +343,7 @@ CREATE TABLE landsat8.product_metadata (
 -- Name: projection_parameters; Type: TABLE; Schema: public; Owner: kelvin
 --
 
-CREATE TABLE landsat8.projection_parameters (
+CREATE TABLE landsat_8_c1.projection_parameters (
     datum text,
     ellipsoid text,
     grid_cell_size_panchromatic double precision,
@@ -363,7 +361,7 @@ CREATE TABLE landsat8.projection_parameters (
 -- Name: radiometric_rescaling; Type: TABLE; Schema: public; Owner: kelvin
 --
 
-CREATE TABLE landsat8.radiometric_rescaling (
+CREATE TABLE landsat_8_c1.radiometric_rescaling (
     landsat_scene_id text NOT NULL,
     radiance_add_band_1 double precision,
     radiance_add_band_10 double precision,
@@ -412,7 +410,7 @@ CREATE TABLE landsat8.radiometric_rescaling (
 -- Name: tirs_thermal_constants; Type: TABLE; Schema: public; Owner: kelvin
 --
 
-CREATE TABLE landsat8.tirs_thermal_constants (
+CREATE TABLE landsat_8_c1.tirs_thermal_constants (
     k1_constant_band_10 double precision,
     k1_constant_band_11 double precision,
     k2_constant_band_10 double precision,
@@ -425,7 +423,7 @@ CREATE TABLE landsat8.tirs_thermal_constants (
 -- Name: image_attributes image_attributes_pkey; Type: CONSTRAINT; Schema: public; Owner: kelvin
 --
 
-ALTER TABLE ONLY landsat8.image_attributes
+ALTER TABLE ONLY landsat_8_c1.image_attributes
     ADD CONSTRAINT image_attributes_pkey PRIMARY KEY (landsat_scene_id);
 
 
@@ -433,7 +431,7 @@ ALTER TABLE ONLY landsat8.image_attributes
 -- Name: images images_pkey; Type: CONSTRAINT; Schema: public; Owner: kelvin
 --
 
-ALTER TABLE ONLY landsat8.images
+ALTER TABLE ONLY landsat_8_c1.images
     ADD CONSTRAINT images_pkey PRIMARY KEY (landsat_scene_id);
 
 
@@ -441,7 +439,7 @@ ALTER TABLE ONLY landsat8.images
 -- Name: metadata_file_info metadata_file_info_pkey; Type: CONSTRAINT; Schema: public; Owner: kelvin
 --
 
-ALTER TABLE ONLY landsat8.metadata_file_info
+ALTER TABLE ONLY landsat_8_c1.metadata_file_info
     ADD CONSTRAINT metadata_file_info_pkey PRIMARY KEY (landsat_scene_id);
 
 
@@ -449,7 +447,7 @@ ALTER TABLE ONLY landsat8.metadata_file_info
 -- Name: min_max_pixel_value min_max_pixel_value_pkey; Type: CONSTRAINT; Schema: public; Owner: kelvin
 --
 
-ALTER TABLE ONLY landsat8.min_max_pixel_value
+ALTER TABLE ONLY landsat_8_c1.min_max_pixel_value
     ADD CONSTRAINT min_max_pixel_value_pkey PRIMARY KEY (landsat_scene_id);
 
 
@@ -457,7 +455,7 @@ ALTER TABLE ONLY landsat8.min_max_pixel_value
 -- Name: min_max_radiance min_max_radiance_pkey; Type: CONSTRAINT; Schema: public; Owner: kelvin
 --
 
-ALTER TABLE ONLY landsat8.min_max_radiance
+ALTER TABLE ONLY landsat_8_c1.min_max_radiance
     ADD CONSTRAINT min_max_radiance_pkey PRIMARY KEY (landsat_scene_id);
 
 
@@ -465,7 +463,7 @@ ALTER TABLE ONLY landsat8.min_max_radiance
 -- Name: min_max_reflectance min_max_reflectance_pkey; Type: CONSTRAINT; Schema: public; Owner: kelvin
 --
 
-ALTER TABLE ONLY landsat8.min_max_reflectance
+ALTER TABLE ONLY landsat_8_c1.min_max_reflectance
     ADD CONSTRAINT min_max_reflectance_pkey PRIMARY KEY (landsat_scene_id);
 
 
@@ -473,7 +471,7 @@ ALTER TABLE ONLY landsat8.min_max_reflectance
 -- Name: product_metadata product_metadata_pkey; Type: CONSTRAINT; Schema: public; Owner: kelvin
 --
 
-ALTER TABLE ONLY landsat8.product_metadata
+ALTER TABLE ONLY landsat_8_c1.product_metadata
     ADD CONSTRAINT product_metadata_pkey PRIMARY KEY (landsat_scene_id);
 
 
@@ -481,7 +479,7 @@ ALTER TABLE ONLY landsat8.product_metadata
 -- Name: projection_parameters projection_parameters_pkey; Type: CONSTRAINT; Schema: public; Owner: kelvin
 --
 
-ALTER TABLE ONLY landsat8.projection_parameters
+ALTER TABLE ONLY landsat_8_c1.projection_parameters
     ADD CONSTRAINT projection_parameters_pkey PRIMARY KEY (landsat_scene_id);
 
 
@@ -489,7 +487,7 @@ ALTER TABLE ONLY landsat8.projection_parameters
 -- Name: radiometric_rescaling radiometric_rescaling_pkey; Type: CONSTRAINT; Schema: public; Owner: kelvin
 --
 
-ALTER TABLE ONLY landsat8.radiometric_rescaling
+ALTER TABLE ONLY landsat_8_c1.radiometric_rescaling
     ADD CONSTRAINT radiometric_rescaling_pkey PRIMARY KEY (landsat_scene_id);
 
 
@@ -497,7 +495,7 @@ ALTER TABLE ONLY landsat8.radiometric_rescaling
 -- Name: tirs_thermal_constants tirs_thermal_constants_pkey; Type: CONSTRAINT; Schema: public; Owner: kelvin
 --
 
-ALTER TABLE ONLY landsat8.tirs_thermal_constants
+ALTER TABLE ONLY landsat_8_c1.tirs_thermal_constants
     ADD CONSTRAINT tirs_thermal_constants_pkey PRIMARY KEY (landsat_scene_id);
 
 
@@ -505,21 +503,21 @@ ALTER TABLE ONLY landsat8.tirs_thermal_constants
 -- Name: idx_images_geom; Type: INDEX; Schema: public; Owner: kelvin
 --
 
-CREATE INDEX idx_images_geom ON landsat8.images USING gist (geom);
+CREATE INDEX idx_images_geom ON landsat_8_c1.images USING gist (geom);
 
 
 --
 -- Name: images_dix; Type: INDEX; Schema: public; Owner: kelvin
 --
 
-CREATE INDEX images_dix ON landsat8.images USING btree ("time");
+CREATE INDEX images_dix ON landsat_8_c1.images USING btree ("time");
 
 
 --
 -- Name: images_gix; Type: INDEX; Schema: public; Owner: kelvin
 --
 
-CREATE INDEX images_gix ON landsat8.images USING gist (geom);
+CREATE INDEX images_gix ON landsat_8_c1.images USING gist (geom);
 
 
 --
