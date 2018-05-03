@@ -2,8 +2,8 @@
 
 .. payloads:
 
-BAYLEEF Payloads
-=============
+Bayleef Payloads
+================
 
 .. automodule:: bayleef.payloads
 	:members:

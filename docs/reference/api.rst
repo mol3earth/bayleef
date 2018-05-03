@@ -2,7 +2,7 @@
 
 .. api:
 
-BAYLEEF API
+Bayleef API
 ===========
 
 Examples

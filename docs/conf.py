@@ -204,7 +204,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'bayleef.tex', u'Bayleef Documentation',
-   u'Amit Kapadia', 'manual'),
+   u'Kelvin Rodriguez', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -234,7 +234,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'bayleef', u'bayleef Documentation',
-     [u'Amit Kapadia'], 1)
+     [u'Kelvin Rodriguez'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -248,7 +248,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'bayleef', u'Bayleef Documentation',
-   u'Amit Kapadia', 'usgs', 'One line description of project.',
+   u'Kelvin Rodriguez', 'usgs', 'One line description of project.',
    'Miscellaneous'),
 ]
 
