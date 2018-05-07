@@ -18,6 +18,31 @@ from bayleef.utils import apply_dict
 
 def landsat_8_c1_to_sql(folder, engine):
     """
+    For tagging day night, the following info is used from USGS EROS:
+
+    Field Definition:  Nearest WRS Row to the Line-Of-Sight scene center.
+    This is used primarily for scenes with off-nadir look angles.
+    The center of scene for off-nadir imaging may be several paths
+    left or right of the orbital path and the center may even be
+    off the WRS-2 grid when near the poles. This is an estimated value, for reference.
+
+    Values:
+    001-059 = Northern Hemisphere (Descending)
+    060 = Equator (Descending)
+    061-119 = Southern Hemisphere (Descending)
+    120-122 = Southern Polar Zone (Descending)
+    123-183 = Southern Hemisphere (Ascending)
+    184 = Equator (Ascending)
+    185-246 = Northern Hemisphere (Ascending)
+    247-248 = Northern Polar Zone (Descending)
+
+    For acquisitions near the poles, it is possible to
+    look off-nadir toward the pole, into an area not defined by the WRS-2 grid
+    (above 82.61 degrees). To allow unique Target Row assignments, the North Pole
+    area is assigned a row of 88n, and the South Pole area is assigned a row of 99n,
+    where n is a sequential number. Up to seven scenes can be covered in these areas;
+    therefore, the scenes are assigned row numbers 880 to 886, or 990 to 996.
+
     """
     try:
         metafile = glob(folder+'/*MTL.txt')[0]
@@ -37,16 +62,17 @@ def landsat_8_c1_to_sql(folder, engine):
              glob(folder+'/*B11.TIF')[0]
         ]
     except IndexError as e:
-        traceback.print_exc()
+        print(traceback.format_exc())
         raise ValueError("{} is not a valid landsat folder: {}".format(folder, e))
 
     metadata = pvl.load(metafile)[0][1]
-
-    # Get the Primary Key
-    pk = metadata['METADATA_FILE_INFO']['LANDSAT_SCENE_ID']
-
     # Change all keys to lowercase since postgres makes uppercase names a pain
     keys_to_lower(metadata)
+
+    # Get the Primary Key
+    pk = metadata['metadata_file_info']['landsat_scene_id']
+    is_day = not int(metadata['product_metadata']['wrs_row']) in range(123,245)
+    metadata['image_attributes']['is_daytime'] = is_day
 
     # Strip Timestamp info from all dates, causes to_sql errors
     apply_dict(metadata, lambda x: str(x).split('+')[0] if isinstance(x, datetime) else x)

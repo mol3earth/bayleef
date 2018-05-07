@@ -141,9 +141,15 @@ CREATE TABLE landsat_8_c1.image_attributes (
     sun_azimuth double precision,
     sun_elevation double precision,
     tirs_ssm_model text,
+    ground_control_points_version  double precision,
+    ground_control_points_model  double precision,
+    geometric_rmse_model  double precision,
+    geometric_rmse_model_y  double precision,
+    geometric_rmse_model_x  double precision,
     tirs_ssm_position_status text,
     tirs_stray_light_correction_source text,
-    truncation_oli text
+    truncation_oli text,
+    is_daytime boolean
 );
 
 
