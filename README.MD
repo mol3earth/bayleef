@@ -1,11 +1,35 @@
 
 ![](logo.png)
 
-Interface to REST services for planetary imagery and relevant data.
+Interface to REST services for planetary imagery with the goal of affording the transfer of mission data into an openly available and homogeneous data store.
 
-Documentation is available at:
+Documentation is available at: https://kelvinrr.github.io/bayleef/
 
-https://kelvinrr.github.io/bayleef/
+## CLI Overview
+
+The CLI allows for the programatic searching, downloading and uploading (to a Postgres server) of USGS data.
+
+The workflow is :
+
+login -> search -> download -> upload  
+
+#### Login
+
+Before you can do anything, you must login using the CLI, logging in requires that you have a USGS EROS account https://ers.cr.usgs.gov/login/ and have authorization to download orders from the RESTful api.   
+
+```
+bayleef login [user] [pass]
+```
+
+#### Search
+
+```
+usgs search [dataset] --node [node] --start-date [start date] --end-date [end date] --longitude [lng] --latitude [lat] 
+```
+
+Breakdown:
+
+ - [dataset] :
 
 ## Example
 

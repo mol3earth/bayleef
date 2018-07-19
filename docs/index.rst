@@ -15,7 +15,7 @@ Installation
 
 .. code-block:: bash
 
-    pip install bayleef
+    conda install -c usgs-astrogeology bayleef
 
 
 Examples
@@ -168,10 +168,7 @@ Contents:
    reference/cli
    reference/api
    reference/payloads
-   reference/catalog/cwic
-   reference/catalog/ee
-   reference/catalog/hdds
-   reference/catalog/lpcs
+   reference/catalog
 
 
 Indices and tables

@@ -36,6 +36,5 @@ The ``where`` parameter used for searching a USGS dataset is best understood by 
         for scene in results['data']['results']:
             print scene
 
-
 .. automodule:: bayleef.api
 	:members:

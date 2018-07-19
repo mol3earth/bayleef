@@ -314,6 +314,21 @@ Unfortunately, this is not all the metadata available for each scene. More metad
       "error": ""
     }
 
+Batch Download
+--------------
+
+Allows for batch downloading from a particular dataset from the provided `bayleaf search` response.
+
+.. note:: Although Bayleef currently supports searching multiple datasets, programatic downloading of datasets in a structured format is only supported for a limited number of datasets. This is because each dataset needs a handwritten driver to define the download structure.
+
+.. code-block:: bash
+
+   # Pipe the output of the search into batch-download, this will download the results
+   bayleef search [dataset] --start-date [start date] --end-date [end date] --longitude [lng] --latitude [lat] --node [node] | bayleef batch-download [root] [node] [response] |
+
+   # An alternative approach, write search results to a file
+   bayleef search [dataset] --start-date [start date] --end-date [end date] --longitude [lng] --latitude [lat] --node [node] > resp.json
+   cat resp.json | bayleef batch-download [root] [node] [response]
 
 Download Options
 ----------------
@@ -328,3 +343,12 @@ Download URL
 .. code-block:: bash
 
     bayleef download-url [dataset] [entity/scene id] --node [node] --product [product]
+
+
+Functions
+---------
+
+Bayleef's CLI simply dispatches to a number of python functions
+
+.. automodule:: bayleef.scripts.cli
+	:members:

@@ -1,0 +1,14 @@
+channels:
+  - krodriguez
+  - usgs-astrogeology
+  - conda-forge
+  - probcomp
+  - anaconda
+  - defaults
+dependencies:
+   - mock
+   - pytest
+   - click
+   - requests
+   - geopandas
+   - pvl
