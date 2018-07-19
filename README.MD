@@ -57,7 +57,7 @@ Breakdown:
 
 #### Upload  
 
-Once the files are downloaded into a homogenous structured format using `batch-download`, they need to be uploaded into a PostGIS database for querying and processing. All tables are stored into schemas matching the dataset name. 
+Once the files are downloaded into a homogenous structured format using `batch-download`, they need to be uploaded into a PostGIS database for querying and processing. All tables are stored into schemas matching the dataset name.
 
 ```
 bayleef to-sql --host [HOST] --port [PORT] --user [USER] --password [PASS] [DATASET] [ROOT] [DB]
@@ -65,7 +65,7 @@ bayleef to-sql --host [HOST] --port [PORT] --user [USER] --password [PASS] [DATA
 
 Breakdown:
 
-- **[HOST]/[PORT]/[USER]/[PASSWORD]** : Conenctions and login info for the PostgreSQL instance
+- **[HOST]/[PORT]/[USER]/[PASSWORD]** : Conenction and login info for the PostgreSQL instance
 - **[dataset]** : The specific collection to download from (e.g. LANDSAT_8_C1 for landsat 8 collection 1), see docs for a list of available datasets
 - **[ROOT]** : Should be the same as the root passed into `batch-download`, the location of the downloaded files.
 - **[DB]** Name of the database to upload to.
