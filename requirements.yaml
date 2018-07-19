@@ -12,3 +12,5 @@ dependencies:
    - requests
    - geopandas
    - pvl
+   - pywget
+   - geoalchemy2

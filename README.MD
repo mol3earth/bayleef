@@ -24,12 +24,51 @@ bayleef login [user] [pass]
 #### Search
 
 ```
-usgs search [dataset] --node [node] --start-date [start date] --end-date [end date] --longitude [lng] --latitude [lat] 
+usgs search [dataset] --node [node] --start-date [start date] --end-date [end date] --longitude [lng] --latitude [lat] --dist [radius]
+```
+
+Returns a JSON string with containing result metadata. The JSON blob doesn't mean much in terms of human readability, but with the optional `--geojson`, the response is turned into GeoJSON which can be rendered to visualize footprints in a viewer (e.g. QGIS, Github Gist).  
+
+Breakdown:
+
+ - **[node]** : Name of the catalog to search in (e.g. cwic for CWIC/LSI Explorer, ee for Earth Explorer, ect.), see docs for a list of available nodes
+ - **[dataset]** : The specific collection to download from (e.g. LANDSAT_8_C1 for landsat 8 collection 1), see docs for a list of available datasets
+ - **[start-data]/[end-data]** : Dates when dataset are aquired in yyyy-mm-dd format
+ - **[longitude]/[latitude]** : lon/lat point the image footprint should intersect
+ - **[radius]** : radius in meters from the lat lon point, if --dist is passed in, any image with a footprint overlapping the circle will be accepted.
+
+#### Download
+
+The search JSON response comes with a download URL. It would be trivial to download a individual image from the download string, but for users more interested in the shotgun approach of simply grabbing all the images that match a search criteria and dump them into a download directory, there is `bayleef batch-download`.
+
+`bayleef batch-download` accepts the JSON string returned from `bayleef search` and mass downloads all the images listed and transforms them into a common format (GeoTIFFs). For example, you can run a spatiotemporal search over Hawaii, and pipe the resulting JSON blob into batch-download.
+
+```
+bayleef search [args] | bayleef batch-download [root] [node]
 ```
 
 Breakdown:
 
- - [dataset] :
+ - **[args]** : the same args you use in `search`, as the results define what is downloaded
+ - **[root]** : Download location. For each dataset, bayleef has a predefined path structure. For example, Landsat 8 is `[year]/[row]/[path]/id.iff`. So you want to reuse the same root directory for every download operation.
+ - **[node]** : Name of the catalog to search in (e.g. cwic for CWIC/LSI Explorer, ee for Earth Explorer, ect.), see docs for a list of available nodes
+
+> ** NOTE ** Each dataset requires a custom ingestion function for batch-downloading, so check the docs for a list of datasets available for download.
+
+#### Upload  
+
+Once the files are downloaded into a homogenous structured format using `batch-download`, they need to be uploaded into a PostGIS database for querying and processing. All tables are stored into schemas matching the dataset name. 
+
+```
+bayleef to-sql --host [HOST] --port [PORT] --user [USER] --password [PASS] [DATASET] [ROOT] [DB]
+```
+
+Breakdown:
+
+- **[HOST]/[PORT]/[USER]/[PASSWORD]** : Conenctions and login info for the PostgreSQL instance
+- **[dataset]** : The specific collection to download from (e.g. LANDSAT_8_C1 for landsat 8 collection 1), see docs for a list of available datasets
+- **[ROOT]** : Should be the same as the root passed into `batch-download`, the location of the downloaded files.
+- **[DB]** Name of the database to upload to.
 
 ## Example
 
