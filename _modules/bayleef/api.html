@@ -1,0 +1,545 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bayleef.api &mdash; bayleef 0.2.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> bayleef
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/cli.html">Bayleef CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/api.html">Bayleef API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/payloads.html">Bayleef Payloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/catalog.html">Catalog</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">bayleef</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>bayleef.api</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for bayleef.api</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">expanduser</span>
+<span class="kn">from</span> <span class="nn">xml.etree</span> <span class="k">import</span> <span class="n">ElementTree</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">requests_futures.sessions</span> <span class="k">import</span> <span class="n">FuturesSession</span>
+
+<span class="kn">from</span> <span class="nn">bayleef</span> <span class="k">import</span> <span class="n">USGS_API</span><span class="p">,</span> <span class="n">USGSError</span>
+<span class="kn">from</span> <span class="nn">bayleef</span> <span class="k">import</span> <span class="n">xsi</span><span class="p">,</span> <span class="n">payloads</span>
+
+
+<span class="n">TMPFILE</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">expanduser</span><span class="p">(</span><span class="s2">&quot;~&quot;</span><span class="p">),</span> <span class="s2">&quot;.usgs&quot;</span><span class="p">)</span>
+<span class="n">NAMESPACES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;eemetadata&quot;</span><span class="p">:</span> <span class="s2">&quot;http://earthexplorer.usgs.gov/eemetadata.xsd&quot;</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">_get_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">TMPFILE</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">TMPFILE</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">api_key</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">api_key</span>
+
+
+<span class="k">def</span> <span class="nf">_check_for_usgs_error</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+
+    <span class="n">error_code</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;errorCode&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">error_code</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">error</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span>
+
+    <span class="k">raise</span> <span class="n">USGSError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">error_code</span><span class="p">,</span> <span class="n">error</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_get_extended</span><span class="p">(</span><span class="n">scene</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parse metadata returned from the metadataUrl of a USGS scene.</span>
+
+<span class="sd">    :param scene:</span>
+<span class="sd">        Dictionary representation of a USGS scene</span>
+<span class="sd">    :param resp:</span>
+<span class="sd">        Response object from requests/grequests</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;eemetadata:metadataFields/eemetadata:metadataField&quot;</span><span class="p">,</span> <span class="n">NAMESPACES</span><span class="p">)</span>
+    <span class="n">scene</span><span class="p">[</span><span class="s1">&#39;extended&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">item</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span> <span class="n">xsi</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">scene</span>
+
+
+<span class="k">def</span> <span class="nf">_async_requests</span><span class="p">(</span><span class="n">urls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sends multiple non-blocking requests. Returns</span>
+<span class="sd">    a list of responses.</span>
+
+<span class="sd">    :param urls:</span>
+<span class="sd">        List of urls</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="n">FuturesSession</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+    <span class="n">futures</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">urls</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="p">[</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span> <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">futures</span> <span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_get_metadata_url</span><span class="p">(</span><span class="n">scene</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">scene</span><span class="p">[</span><span class="s1">&#39;metadataUrl&#39;</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">clear_bulk_download_order</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">clear_order</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">dataset_fields</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">_get_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;jsonRequest&quot;</span><span class="p">:</span> <span class="n">payloads</span><span class="o">.</span><span class="n">dataset_fields</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/datasetfields&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">USGS_API</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+    <span class="n">_check_for_usgs_error</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">response</span>
+
+
+<span class="k">def</span> <span class="nf">datasets</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">ll</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ur</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">_get_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/datasets&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">USGS_API</span><span class="p">)</span>
+
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;jsonRequest&quot;</span><span class="p">:</span> <span class="n">payloads</span><span class="o">.</span><span class="n">datasets</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">ll</span><span class="o">=</span><span class="n">ll</span><span class="p">,</span> <span class="n">ur</span><span class="o">=</span><span class="n">ur</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+    <span class="n">_check_for_usgs_error</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">response</span>
+
+
+<div class="viewcode-block" id="download"><a class="viewcode-back" href="../../reference/api.html#bayleef.api.download">[docs]</a><span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">entityids</span><span class="p">,</span> <span class="n">product</span><span class="o">=</span><span class="s1">&#39;STANDARD&#39;</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Though USGS supports multiple products in a single request, there&#39;s</span>
+<span class="sd">    ambiguity in the returned list. This wrapper only allows a single</span>
+<span class="sd">    product per request.</span>
+
+<span class="sd">    Additionally, the response has no indiction which URL is associated</span>
+<span class="sd">    with which scene/entity id. The URL can be parsed, but the structure</span>
+<span class="sd">    varies depending on the product.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">_get_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/download&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">USGS_API</span><span class="p">)</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;jsonRequest&quot;</span><span class="p">:</span> <span class="n">payloads</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">entityids</span><span class="p">,</span> <span class="p">[</span><span class="n">product</span><span class="p">],</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+    <span class="n">_check_for_usgs_error</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">response</span></div>
+
+
+<span class="k">def</span> <span class="nf">download_options</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">entityids</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">_get_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/downloadoptions&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">USGS_API</span><span class="p">)</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;jsonRequest&quot;</span><span class="p">:</span> <span class="n">payloads</span><span class="o">.</span><span class="n">download_options</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">entityids</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+    <span class="n">_check_for_usgs_error</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">response</span>
+
+
+<span class="k">def</span> <span class="nf">get_bulk_download_products</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">get_order_products</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">hits</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">item_basket</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/login&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">USGS_API</span><span class="p">)</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;jsonRequest&quot;</span><span class="p">:</span> <span class="n">payloads</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">status_code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">USGSError</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">response</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">api_key</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">USGSError</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">save</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">TMPFILE</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">response</span>
+
+
+<span class="k">def</span> <span class="nf">logout</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">_get_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/logout&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">USGS_API</span><span class="p">)</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;jsonRequest&quot;</span><span class="p">:</span> <span class="n">payloads</span><span class="o">.</span><span class="n">logout</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+    <span class="n">_check_for_usgs_error</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">TMPFILE</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">TMPFILE</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">response</span>
+
+
+<div class="viewcode-block" id="metadata"><a class="viewcode-back" href="../../reference/api.html#bayleef.api.metadata">[docs]</a><span class="k">def</span> <span class="nf">metadata</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">entityids</span><span class="p">,</span> <span class="n">extended</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Request metadata for a given scene in a USGS dataset.</span>
+
+<span class="sd">    :param dataset:</span>
+<span class="sd">    :param node:</span>
+<span class="sd">    :param entityids:</span>
+<span class="sd">    :param extended:</span>
+<span class="sd">        Send a second request to the metadata url to get extended metadata on the scene.</span>
+<span class="sd">    :param api_key:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">_get_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/metadata&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">USGS_API</span><span class="p">)</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;jsonRequest&quot;</span><span class="p">:</span> <span class="n">payloads</span><span class="o">.</span><span class="n">metadata</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">entityids</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+    <span class="n">_check_for_usgs_error</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">extended</span><span class="p">:</span>
+        <span class="n">metadata_urls</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">_get_metadata_url</span><span class="p">,</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">])</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">_async_requests</span><span class="p">(</span><span class="n">metadata_urls</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">idx</span><span class="p">:</span> <span class="n">_get_extended</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="n">idx</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="n">idx</span><span class="p">]),</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">])))</span>
+
+    <span class="k">return</span> <span class="n">response</span></div>
+
+
+<span class="k">def</span> <span class="nf">remove_bulk_download_scene</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">remove_order_scene</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<div class="viewcode-block" id="search"><a class="viewcode-back" href="../../reference/api.html#bayleef.api.search">[docs]</a><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lng</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">ll</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ur</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+           <span class="n">where</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_results</span><span class="o">=</span><span class="mi">50000</span><span class="p">,</span> <span class="n">starting_number</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sort_order</span><span class="o">=</span><span class="s2">&quot;DESC&quot;</span><span class="p">,</span> <span class="n">extended</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    :param dataset:</span>
+<span class="sd">        USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)</span>
+<span class="sd">    :param node:</span>
+<span class="sd">        USGS node representing a dataset catalog (e.g. CWIC, EE, HDDS, LPVS)</span>
+<span class="sd">    :param lat:</span>
+<span class="sd">        Latitude</span>
+<span class="sd">    :param lng:</span>
+<span class="sd">        Longitude</span>
+<span class="sd">    :param distance:</span>
+<span class="sd">        Distance in meters used to for a radial search</span>
+<span class="sd">    :param ll:</span>
+<span class="sd">        Dictionary of longitude/latitude coordinates for the lower left corner</span>
+<span class="sd">        of a bounding box search. e.g. { &quot;longitude&quot;: 0.0, &quot;latitude&quot;: 0.0 }</span>
+<span class="sd">    :param ur:</span>
+<span class="sd">        Dictionary of longitude/latitude coordinates for the upper right corner</span>
+<span class="sd">        of a bounding box search. e.g. { &quot;longitude&quot;: 0.0, &quot;latitude&quot;: 0.0 }</span>
+<span class="sd">    :param start_date:</span>
+<span class="sd">        Start date for when a scene has been acquired</span>
+<span class="sd">    :param end_date:</span>
+<span class="sd">        End date for when a scene has been acquired</span>
+<span class="sd">    :where:</span>
+<span class="sd">        Dictionary representing key/values for finer grained conditional</span>
+<span class="sd">        queries. Only a subset of metadata fields are supported. Available</span>
+<span class="sd">        fields depend on the value of `dataset`, and maybe be found by</span>
+<span class="sd">        submitting a dataset_fields query.</span>
+<span class="sd">    :max_results:</span>
+<span class="sd">        Maximum results returned by the server</span>
+<span class="sd">    :starting_number:</span>
+<span class="sd">        Starting offset for results of a query.</span>
+<span class="sd">    :sort_order:</span>
+<span class="sd">        Order in which results are sorted. Ascending or descending w.r.t the acquisition date.</span>
+<span class="sd">    :extended:</span>
+<span class="sd">        Boolean flag. When true a subsequent query will be sent to the `metadataUrl` returned by</span>
+<span class="sd">        the first query.</span>
+<span class="sd">    :api_key:</span>
+<span class="sd">        API key for EROS. Required for searching.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">api_key</span> <span class="o">=</span> <span class="n">_get_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
+
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/search&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">USGS_API</span><span class="p">)</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;jsonRequest&quot;</span><span class="p">:</span> <span class="n">payloads</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span>
+        <span class="n">lat</span><span class="o">=</span><span class="n">lat</span><span class="p">,</span> <span class="n">lng</span><span class="o">=</span><span class="n">lng</span><span class="p">,</span>
+        <span class="n">distance</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+        <span class="n">ll</span><span class="o">=</span><span class="n">ll</span><span class="p">,</span> <span class="n">ur</span><span class="o">=</span><span class="n">ur</span><span class="p">,</span>
+        <span class="n">start_date</span><span class="o">=</span><span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="n">end_date</span><span class="p">,</span>
+        <span class="n">where</span><span class="o">=</span><span class="n">where</span><span class="p">,</span>
+        <span class="n">max_results</span><span class="o">=</span><span class="n">max_results</span><span class="p">,</span>
+        <span class="n">starting_number</span><span class="o">=</span><span class="n">starting_number</span><span class="p">,</span>
+        <span class="n">sort_order</span><span class="o">=</span><span class="n">sort_order</span><span class="p">,</span>
+        <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span>
+    <span class="p">)}</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+    <span class="n">_check_for_usgs_error</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">extended</span><span class="p">:</span>
+        <span class="n">metadata_urls</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">_get_metadata_url</span><span class="p">,</span> <span class="n">response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;results&#39;</span><span class="p">])</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">_async_requests</span><span class="p">(</span><span class="n">metadata_urls</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">idx</span><span class="p">:</span> <span class="n">_get_extended</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;results&#39;</span><span class="p">][</span><span class="n">idx</span><span class="p">],</span> <span class="n">results</span><span class="p">[</span><span class="n">idx</span><span class="p">]),</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;results&#39;</span><span class="p">])))</span>
+
+    <span class="k">return</span> <span class="n">response</span></div>
+
+
+<span class="k">def</span> <span class="nf">submit_bulk_order</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">submit_order</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">update_bulk_download_scene</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">update_order_scene</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Amit Kapadia.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.2.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

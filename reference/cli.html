@@ -1,0 +1,559 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Bayleef CLI &mdash; bayleef 0.2.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Bayleef API" href="api.html" />
+    <link rel="prev" title="Bayleef" href="../index.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> bayleef
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Bayleef CLI</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#login">Login</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logout">Logout</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#search">Search</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metadata">Metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#batch-download">Batch Download</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#download-options">Download Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#download-url">Download URL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Bayleef API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="payloads.html">Bayleef Payloads</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">bayleef</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Bayleef CLI</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/reference/cli.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <span class="target" id="module-bayleef.scripts"></span><div class="section" id="bayleef-cli">
+<h1>Bayleef CLI<a class="headerlink" href="#bayleef-cli" title="Permalink to this headline">¶</a></h1>
+<p>This library comes with a command line interface to expose many common requests, such as authenticating, searching, downloading, and obtaining metadata.</p>
+<p>Here’s an example of what can be done using the cli and GitHub Gists.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bayleef search --node EE EO1_HYP_PUB --start-date <span class="m">20150401</span> --end-date <span class="m">20150501</span> --geojson <span class="p">|</span> gist -f hyperion-20150401-20150501.geojson
+</pre></div>
+</div>
+<div style="margin-top:10px; margin-bottom:20px">
+  <iframe class='ghmap' width="640" height="400" src="https://render.githubusercontent.com/view/geojson/?url=https%3A%2F%2Fgist.githubusercontent.com%2Fkapadia%2F6e722427cecd9ac79971%2Fraw%2Fhyperion-20150401-20150501.geojson#aa859151-d85a-414d-865c-9704fae891a1" frameborder="0"></iframe>
+</div><div class="section" id="login">
+<h2>Login<a class="headerlink" href="#login" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bayleef login <span class="o">[</span>USGS username<span class="o">]</span> <span class="o">[</span>USGS password<span class="o">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="logout">
+<h2>Logout<a class="headerlink" href="#logout" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bayleef <span class="nb">logout</span> <span class="o">[</span>USGS username<span class="o">]</span> <span class="o">[</span>USGS password<span class="o">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="search">
+<h2>Search<a class="headerlink" href="#search" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bayleef search <span class="o">[</span>dataset<span class="o">]</span> --start-date <span class="o">[</span>start date<span class="o">]</span> --end-date <span class="o">[</span>end date<span class="o">]</span> --longitude <span class="o">[</span>lng<span class="o">]</span> --latitude <span class="o">[</span>lat<span class="o">]</span> --node <span class="o">[</span>node<span class="o">]</span>
+</pre></div>
+</div>
+<p>Suppose you’re interested in declassified satellite imagery. The datasets <code class="docutils literal notranslate"><span class="pre">CORONA2</span></code> or <code class="docutils literal notranslate"><span class="pre">DECLASSII</span></code> can be queried. If you have a GeoJSON file with an AOI, you can pipe the file to <code class="docutils literal notranslate"><span class="pre">search</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cat chile.geojson <span class="p">|</span> bayleef search --node EE DECLASSII --start-date <span class="m">19700101</span> --end-date <span class="m">19800101</span> --geojson <span class="p">|</span> gist -f declassii-chile-1970s.geojson
+</pre></div>
+</div>
+<div style="margin-top:10px; margin-bottom:20px">
+  <iframe class='ghmap' width="640" height="400" src="https://render.githubusercontent.com/view/geojson/?url=https%3A%2F%2Fgist.githubusercontent.com%2Fkapadia%2Ffd15d4082da2ec47dbc5%2Fraw%2Fdeclassii-chile-1970s.geojson#08b6ad6d-046d-4fac-9ada-553356358235" frameborder="0"></iframe>
+</div>
+
+<script>
+window.onresize = function(e) {
+  var mainEl = document.querySelector('div[role="main"]');
+
+  var mapElems = document.querySelectorAll('.ghmap');
+  for (var i = 0; i < mapElems.length; i++) {
+    mapElems[i].width = mainEl.clientWidth;
+  }
+}
+
+window.onresize();
+</script></div>
+<div class="section" id="metadata">
+<h2>Metadata<a class="headerlink" href="#metadata" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bayleef metadata <span class="o">[</span>dataset<span class="o">]</span> <span class="o">[</span>entity/scene id <span class="m">1</span><span class="o">]</span> <span class="o">[</span>entity/scene id <span class="m">2</span><span class="o">]</span> ... <span class="o">[</span>entity/scene id n<span class="o">]</span>
+</pre></div>
+</div>
+<p>Suppose you want metadata from a couple scenes taken by Hyperion.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ bayleef metadata --node EE EO1_HYP_PUB EO1H1820422014302110K2_SG1_01 EO1H1830422015093110KF_TR2_01 <span class="p">|</span> jq <span class="s2">&quot;&quot;</span>
+<span class="o">{</span>
+  <span class="s2">&quot;errorCode&quot;</span>: null,
+  <span class="s2">&quot;executionTime&quot;</span>: <span class="m">1</span>.676698923111,
+  <span class="s2">&quot;data&quot;</span>: <span class="o">[</span>
+    <span class="o">{</span>
+      <span class="s2">&quot;metadataUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/metadata/xml/1854/EO1H1820422014302110K2_SG1_01/&quot;</span>,
+      <span class="s2">&quot;upperLeftCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">26</span>.253489,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">21</span>.53022
+      <span class="o">}</span>,
+      <span class="s2">&quot;fgdcMetadataUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/fgdc/1854/EO1H1820422014302110K2_SG1_01/save_xml&quot;</span>,
+      <span class="s2">&quot;displayId&quot;</span>: <span class="s2">&quot;EO1H1820422014302110K2_SG1_01&quot;</span>,
+      <span class="s2">&quot;acquisitionDate&quot;</span>: <span class="s2">&quot;2014-10-29&quot;</span>,
+      <span class="s2">&quot;browseUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/browse/eo-1/hyp/182/42/2014/EO11820422014302110K2_SG1_01.jpeg&quot;</span>,
+      <span class="s2">&quot;dataAccessUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/order/process?dataset_name=EO1_HYP_PUB&amp;ordered=EO1H1820422014302110K2_SG1_01&amp;node=INVSVC&quot;</span>,
+      <span class="s2">&quot;orderUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/order/process?dataset_name=EO1_HYP_PUB&amp;ordered=EO1H1820422014302110K2_SG1_01&amp;node=INVSVC&quot;</span>,
+      <span class="s2">&quot;upperRightCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">26</span>.240475,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">21</span>.602509
+      <span class="o">}</span>,
+      <span class="s2">&quot;summary&quot;</span>: <span class="s2">&quot;Entity ID: EO1H1820422014302110K2_SG1_01, Acquisition Date: 29-OCT-14, Target Path: 182, Target Row: 42&quot;</span>,
+      <span class="s2">&quot;downloadUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/download/external/options/EO1_HYP_PUB/EO1H1820422014302110K2_SG1_01/INVSVC/&quot;</span>,
+      <span class="s2">&quot;lowerLeftCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">24</span>.365584,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">21</span>.074194
+      <span class="o">}</span>,
+      <span class="s2">&quot;modifiedDate&quot;</span>: <span class="s2">&quot;2017-03-22&quot;</span>,
+      <span class="s2">&quot;startTime&quot;</span>: <span class="s2">&quot;2014-10-29&quot;</span>,
+      <span class="s2">&quot;sceneBounds&quot;</span>: <span class="s2">&quot;21.074194,24.352528,21.602509,26.253489&quot;</span>,
+      <span class="s2">&quot;ordered&quot;</span>: false,
+      <span class="s2">&quot;entityId&quot;</span>: <span class="s2">&quot;EO1H1820422014302110K2_SG1_01&quot;</span>,
+      <span class="s2">&quot;endTime&quot;</span>: <span class="s2">&quot;2014-10-29&quot;</span>,
+      <span class="s2">&quot;lowerRightCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">24</span>.352528,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">21</span>.145425
+      <span class="o">}</span>,
+      <span class="s2">&quot;bulkOrdered&quot;</span>: <span class="nb">false</span>
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">&quot;metadataUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/metadata/xml/1854/EO1H1830422015093110KF_TR2_01/&quot;</span>,
+      <span class="s2">&quot;upperLeftCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">25</span>.663285,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">20</span>.41565
+      <span class="o">}</span>,
+      <span class="s2">&quot;fgdcMetadataUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/fgdc/1854/EO1H1830422015093110KF_TR2_01/save_xml&quot;</span>,
+      <span class="s2">&quot;displayId&quot;</span>: <span class="s2">&quot;EO1H1830422015093110KF_TR2_01&quot;</span>,
+      <span class="s2">&quot;acquisitionDate&quot;</span>: <span class="s2">&quot;2015-04-03&quot;</span>,
+      <span class="s2">&quot;browseUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/browse/eo-1/hyp/183/42/2015/EO11830422015093110KF_TR2_01.jpeg&quot;</span>,
+      <span class="s2">&quot;dataAccessUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/order/process?dataset_name=EO1_HYP_PUB&amp;ordered=EO1H1830422015093110KF_TR2_01&amp;node=INVSVC&quot;</span>,
+      <span class="s2">&quot;orderUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/order/process?dataset_name=EO1_HYP_PUB&amp;ordered=EO1H1830422015093110KF_TR2_01&amp;node=INVSVC&quot;</span>,
+      <span class="s2">&quot;upperRightCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">25</span>.650833,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">20</span>.489455
+      <span class="o">}</span>,
+      <span class="s2">&quot;summary&quot;</span>: <span class="s2">&quot;Entity ID: EO1H1830422015093110KF_TR2_01, Acquisition Date: 03-APR-15, Target Path: 183, Target Row: 42&quot;</span>,
+      <span class="s2">&quot;downloadUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/download/external/options/EO1_HYP_PUB/EO1H1830422015093110KF_TR2_01/INVSVC/&quot;</span>,
+      <span class="s2">&quot;lowerLeftCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">24</span>.800065,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">20</span>.220225
+      <span class="o">}</span>,
+      <span class="s2">&quot;modifiedDate&quot;</span>: <span class="s2">&quot;2017-03-22&quot;</span>,
+      <span class="s2">&quot;startTime&quot;</span>: <span class="s2">&quot;2015-04-03&quot;</span>,
+      <span class="s2">&quot;sceneBounds&quot;</span>: <span class="s2">&quot;20.220225,24.787699,20.489455,25.663285&quot;</span>,
+      <span class="s2">&quot;ordered&quot;</span>: false,
+      <span class="s2">&quot;entityId&quot;</span>: <span class="s2">&quot;EO1H1830422015093110KF_TR2_01&quot;</span>,
+      <span class="s2">&quot;endTime&quot;</span>: <span class="s2">&quot;2015-04-03&quot;</span>,
+      <span class="s2">&quot;lowerRightCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">24</span>.787699,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">20</span>.293527
+      <span class="o">}</span>,
+      <span class="s2">&quot;bulkOrdered&quot;</span>: <span class="nb">false</span>
+    <span class="o">}</span>
+  <span class="o">]</span>,
+  <span class="s2">&quot;api_version&quot;</span>: <span class="s2">&quot;1.2.1&quot;</span>,
+  <span class="s2">&quot;error&quot;</span>: <span class="s2">&quot;&quot;</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Unfortunately, this is not all the metadata available for each scene. More metadata is found behind the <code class="docutils literal notranslate"><span class="pre">metadataUrl</span></code>. Using the <code class="docutils literal notranslate"><span class="pre">extended</span></code> flag will send a second request to USGS, and aggregrate the results in the returned JSON.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ bayleef metadata --node EE EO1_HYP_PUB EO1H1820422014302110K2_SG1_01 EO1H1830422015093110KF_TR2_01 --extended <span class="p">|</span> jq <span class="s2">&quot;&quot;</span>
+<span class="o">{</span>
+  <span class="s2">&quot;errorCode&quot;</span>: null,
+  <span class="s2">&quot;executionTime&quot;</span>: <span class="m">1</span>.5633571147919,
+  <span class="s2">&quot;data&quot;</span>: <span class="o">[</span>
+    <span class="o">{</span>
+      <span class="s2">&quot;metadataUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/metadata/xml/1854/EO1H1820422014302110K2_SG1_01/&quot;</span>,
+      <span class="s2">&quot;upperLeftCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">26</span>.253489,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">21</span>.53022
+      <span class="o">}</span>,
+      <span class="s2">&quot;fgdcMetadataUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/fgdc/1854/EO1H1820422014302110K2_SG1_01/save_xml&quot;</span>,
+      <span class="s2">&quot;displayId&quot;</span>: <span class="s2">&quot;EO1H1820422014302110K2_SG1_01&quot;</span>,
+      <span class="s2">&quot;acquisitionDate&quot;</span>: <span class="s2">&quot;2014-10-29&quot;</span>,
+      <span class="s2">&quot;browseUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/browse/eo-1/hyp/182/42/2014/EO11820422014302110K2_SG1_01.jpeg&quot;</span>,
+      <span class="s2">&quot;dataAccessUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/order/process?dataset_name=EO1_HYP_PUB&amp;ordered=EO1H1820422014302110K2_SG1_01&amp;node=INVSVC&quot;</span>,
+      <span class="s2">&quot;orderUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/order/process?dataset_name=EO1_HYP_PUB&amp;ordered=EO1H1820422014302110K2_SG1_01&amp;node=INVSVC&quot;</span>,
+      <span class="s2">&quot;upperRightCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">26</span>.240475,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">21</span>.602509
+      <span class="o">}</span>,
+      <span class="s2">&quot;summary&quot;</span>: <span class="s2">&quot;Entity ID: EO1H1820422014302110K2_SG1_01, Acquisition Date: 29-OCT-14, Target Path: 182, Target Row: 42&quot;</span>,
+      <span class="s2">&quot;downloadUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/download/external/options/EO1_HYP_PUB/EO1H1820422014302110K2_SG1_01/INVSVC/&quot;</span>,
+      <span class="s2">&quot;lowerLeftCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">24</span>.365584,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">21</span>.074194
+      <span class="o">}</span>,
+      <span class="s2">&quot;extended&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;NE Corner Long&quot;</span>: <span class="s2">&quot;21&amp;amp;deg;35&#39;20.41&amp;quot;E&quot;</span>,
+        <span class="s2">&quot;NW Corner Long&quot;</span>: <span class="s2">&quot;21&amp;amp;deg;30&#39;58.05&amp;quot;E&quot;</span>,
+        <span class="s2">&quot;Entity ID&quot;</span>: <span class="s2">&quot;EO1H1820422014302110K2_SG1_01&quot;</span>,
+        <span class="s2">&quot;Sun Elevation&quot;</span>: <span class="s2">&quot;38.506879&quot;</span>,
+        <span class="s2">&quot;NW Corner Lat dec&quot;</span>: <span class="s2">&quot;26.178639&quot;</span>,
+        <span class="s2">&quot;Station&quot;</span>: <span class="s2">&quot;SG1&quot;</span>,
+        <span class="s2">&quot;Center Latitude dec&quot;</span>: <span class="s2">&quot;25.233517&quot;</span>,
+        <span class="s2">&quot;Target Path&quot;</span>: <span class="s2">&quot;182&quot;</span>,
+        <span class="s2">&quot;SE Corner Long&quot;</span>: <span class="s2">&quot;21&amp;amp;deg;08&#39;06.46&amp;quot;E&quot;</span>,
+        <span class="s2">&quot;Look Angle&quot;</span>: <span class="s2">&quot;2.2046&quot;</span>,
+        <span class="s2">&quot;SW Corner Long dec&quot;</span>: <span class="s2">&quot;21.063363&quot;</span>,
+        <span class="s2">&quot;Scene Start Time&quot;</span>: <span class="s2">&quot;2014:302:07:58:59.273&quot;</span>,
+        <span class="s2">&quot;Cloud Cover&quot;</span>: <span class="s2">&quot;10% to 19% Cloud Cover&quot;</span>,
+        <span class="s2">&quot;NW Corner Lat&quot;</span>: <span class="s2">&quot;26&amp;amp;deg;10&#39;43.10&amp;quot;N&quot;</span>,
+        <span class="s2">&quot;SW Corner Lat dec&quot;</span>: <span class="s2">&quot;24.302885&quot;</span>,
+        <span class="s2">&quot;Orbit Row&quot;</span>: <span class="s2">&quot;42&quot;</span>,
+        <span class="s2">&quot;NE Corner Lat&quot;</span>: <span class="s2">&quot;26&amp;amp;deg;09&#39;50.63&amp;quot;N&quot;</span>,
+        <span class="s2">&quot;Target Row&quot;</span>: <span class="s2">&quot;42&quot;</span>,
+        <span class="s2">&quot;Date Entered&quot;</span>: <span class="s2">&quot;2014/10/29&quot;</span>,
+        <span class="s2">&quot;NW Corner Long dec&quot;</span>: <span class="s2">&quot;21.516126&quot;</span>,
+        <span class="s2">&quot;Processing Level&quot;</span>: <span class="s2">&quot;L1T Product Available&quot;</span>,
+        <span class="s2">&quot;Center Longtude dec&quot;</span>: <span class="s2">&quot;21.325905&quot;</span>,
+        <span class="s2">&quot;NE Corner Lat dec&quot;</span>: <span class="s2">&quot;26.164064&quot;</span>,
+        <span class="s2">&quot;SE Corner Long dec&quot;</span>: <span class="s2">&quot;21.135127&quot;</span>,
+        <span class="s2">&quot;Center Latitude&quot;</span>: <span class="s2">&quot;25&amp;amp;deg;14&#39;00.66&amp;quot;N&quot;</span>,
+        <span class="s2">&quot;SW Corner Long&quot;</span>: <span class="s2">&quot;21&amp;amp;deg;03&#39;48.11&amp;quot;E&quot;</span>,
+        <span class="s2">&quot;NE Corner Long dec&quot;</span>: <span class="s2">&quot;21.589002&quot;</span>,
+        <span class="s2">&quot;SE Corner Lat dec&quot;</span>: <span class="s2">&quot;24.288481&quot;</span>,
+        <span class="s2">&quot;Acquisition Date&quot;</span>: <span class="s2">&quot;2014/10/29&quot;</span>,
+        <span class="s2">&quot;Scene Stop Time&quot;</span>: <span class="s2">&quot;2014:302:07:59:31.273&quot;</span>,
+        <span class="s2">&quot;SE Corner Lat&quot;</span>: <span class="s2">&quot;24&amp;amp;deg;17&#39;18.53&amp;quot;N&quot;</span>,
+        <span class="s2">&quot;Satellite Inclination&quot;</span>: <span class="s2">&quot;97.96&quot;</span>,
+        <span class="s2">&quot;Orbit Path&quot;</span>: <span class="s2">&quot;182&quot;</span>,
+        <span class="s2">&quot;Center Longitude&quot;</span>: <span class="s2">&quot;21&amp;amp;deg;19&#39;33.26&amp;quot;E&quot;</span>,
+        <span class="s2">&quot;SW Corner Lat&quot;</span>: <span class="s2">&quot;24&amp;amp;deg;18&#39;10.39&amp;quot;N&quot;</span>,
+        <span class="s2">&quot;Sun Azimuth&quot;</span>: <span class="s2">&quot;134.735736&quot;</span>
+      <span class="o">}</span>,
+      <span class="s2">&quot;modifiedDate&quot;</span>: <span class="s2">&quot;2017-03-22&quot;</span>,
+      <span class="s2">&quot;startTime&quot;</span>: <span class="s2">&quot;2014-10-29&quot;</span>,
+      <span class="s2">&quot;sceneBounds&quot;</span>: <span class="s2">&quot;21.074194,24.352528,21.602509,26.253489&quot;</span>,
+      <span class="s2">&quot;ordered&quot;</span>: false,
+      <span class="s2">&quot;entityId&quot;</span>: <span class="s2">&quot;EO1H1820422014302110K2_SG1_01&quot;</span>,
+      <span class="s2">&quot;endTime&quot;</span>: <span class="s2">&quot;2014-10-29&quot;</span>,
+      <span class="s2">&quot;lowerRightCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">24</span>.352528,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">21</span>.145425
+      <span class="o">}</span>,
+      <span class="s2">&quot;bulkOrdered&quot;</span>: <span class="nb">false</span>
+    <span class="o">}</span>,
+    <span class="o">{</span>
+      <span class="s2">&quot;metadataUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/metadata/xml/1854/EO1H1830422015093110KF_TR2_01/&quot;</span>,
+      <span class="s2">&quot;upperLeftCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">25</span>.663285,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">20</span>.41565
+      <span class="o">}</span>,
+      <span class="s2">&quot;fgdcMetadataUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/fgdc/1854/EO1H1830422015093110KF_TR2_01/save_xml&quot;</span>,
+      <span class="s2">&quot;displayId&quot;</span>: <span class="s2">&quot;EO1H1830422015093110KF_TR2_01&quot;</span>,
+      <span class="s2">&quot;acquisitionDate&quot;</span>: <span class="s2">&quot;2015-04-03&quot;</span>,
+      <span class="s2">&quot;browseUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/browse/eo-1/hyp/183/42/2015/EO11830422015093110KF_TR2_01.jpeg&quot;</span>,
+      <span class="s2">&quot;dataAccessUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/order/process?dataset_name=EO1_HYP_PUB&amp;ordered=EO1H1830422015093110KF_TR2_01&amp;node=INVSVC&quot;</span>,
+      <span class="s2">&quot;orderUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/order/process?dataset_name=EO1_HYP_PUB&amp;ordered=EO1H1830422015093110KF_TR2_01&amp;node=INVSVC&quot;</span>,
+      <span class="s2">&quot;upperRightCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">25</span>.650833,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">20</span>.489455
+      <span class="o">}</span>,
+      <span class="s2">&quot;summary&quot;</span>: <span class="s2">&quot;Entity ID: EO1H1830422015093110KF_TR2_01, Acquisition Date: 03-APR-15, Target Path: 183, Target Row: 42&quot;</span>,
+      <span class="s2">&quot;downloadUrl&quot;</span>: <span class="s2">&quot;https://earthexplorer.usgs.gov/download/external/options/EO1_HYP_PUB/EO1H1830422015093110KF_TR2_01/INVSVC/&quot;</span>,
+      <span class="s2">&quot;lowerLeftCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">24</span>.800065,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">20</span>.220225
+      <span class="o">}</span>,
+      <span class="s2">&quot;extended&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;NE Corner Long&quot;</span>: <span class="s2">&quot;20&amp;amp;deg;28&#39;20.11&amp;quot;E&quot;</span>,
+        <span class="s2">&quot;NW Corner Long&quot;</span>: <span class="s2">&quot;20&amp;amp;deg;23&#39;52.21&amp;quot;E&quot;</span>,
+        <span class="s2">&quot;Entity ID&quot;</span>: <span class="s2">&quot;EO1H1830422015093110KF_TR2_01&quot;</span>,
+        <span class="s2">&quot;Sun Elevation&quot;</span>: <span class="s2">&quot;42.984461&quot;</span>,
+        <span class="s2">&quot;NW Corner Lat dec&quot;</span>: <span class="s2">&quot;25.587842&quot;</span>,
+        <span class="s2">&quot;Station&quot;</span>: <span class="s2">&quot;TR2&quot;</span>,
+        <span class="s2">&quot;Center Latitude dec&quot;</span>: <span class="s2">&quot;25.15576&quot;</span>,
+        <span class="s2">&quot;Target Path&quot;</span>: <span class="s2">&quot;183&quot;</span>,
+        <span class="s2">&quot;SE Corner Long&quot;</span>: <span class="s2">&quot;20&amp;amp;deg;16&#39;43.78&amp;quot;E&quot;</span>,
+        <span class="s2">&quot;Look Angle&quot;</span>: <span class="s2">&quot;-10.588&quot;</span>,
+        <span class="s2">&quot;SW Corner Long dec&quot;</span>: <span class="s2">&quot;20.20492&quot;</span>,
+        <span class="s2">&quot;Scene Start Time&quot;</span>: <span class="s2">&quot;2015:093:07:44:06.278&quot;</span>,
+        <span class="s2">&quot;Cloud Cover&quot;</span>: <span class="s2">&quot;0 to 9% Cloud Cover&quot;</span>,
+        <span class="s2">&quot;NW Corner Lat&quot;</span>: <span class="s2">&quot;25&amp;amp;deg;35&#39;16.23&amp;quot;N&quot;</span>,
+        <span class="s2">&quot;SW Corner Lat dec&quot;</span>: <span class="s2">&quot;24.737627&quot;</span>,
+        <span class="s2">&quot;Orbit Row&quot;</span>: <span class="s2">&quot;43&quot;</span>,
+        <span class="s2">&quot;NE Corner Lat&quot;</span>: <span class="s2">&quot;25&amp;amp;deg;34&#39;25.92&amp;quot;N&quot;</span>,
+        <span class="s2">&quot;Target Row&quot;</span>: <span class="s2">&quot;42&quot;</span>,
+        <span class="s2">&quot;Date Entered&quot;</span>: <span class="s2">&quot;2015/04/03&quot;</span>,
+        <span class="s2">&quot;NW Corner Long dec&quot;</span>: <span class="s2">&quot;20.397836&quot;</span>,
+        <span class="s2">&quot;Processing Level&quot;</span>: <span class="s2">&quot;L1T Product Available&quot;</span>,
+        <span class="s2">&quot;Center Longtude dec&quot;</span>: <span class="s2">&quot;20.33846&quot;</span>,
+        <span class="s2">&quot;NE Corner Lat dec&quot;</span>: <span class="s2">&quot;25.573867&quot;</span>,
+        <span class="s2">&quot;SE Corner Long dec&quot;</span>: <span class="s2">&quot;20.278828&quot;</span>,
+        <span class="s2">&quot;Center Latitude&quot;</span>: <span class="s2">&quot;25&amp;amp;deg;09&#39;20.74&amp;quot;N&quot;</span>,
+        <span class="s2">&quot;SW Corner Long&quot;</span>: <span class="s2">&quot;20&amp;amp;deg;12&#39;17.71&amp;quot;E&quot;</span>,
+        <span class="s2">&quot;NE Corner Long dec&quot;</span>: <span class="s2">&quot;20.472254&quot;</span>,
+        <span class="s2">&quot;SE Corner Lat dec&quot;</span>: <span class="s2">&quot;24.723703&quot;</span>,
+        <span class="s2">&quot;Acquisition Date&quot;</span>: <span class="s2">&quot;2015/04/03&quot;</span>,
+        <span class="s2">&quot;Scene Stop Time&quot;</span>: <span class="s2">&quot;2015:093:07:44:21.278&quot;</span>,
+        <span class="s2">&quot;SE Corner Lat&quot;</span>: <span class="s2">&quot;24&amp;amp;deg;43&#39;25.33&amp;quot;N&quot;</span>,
+        <span class="s2">&quot;Satellite Inclination&quot;</span>: <span class="s2">&quot;97.98&quot;</span>,
+        <span class="s2">&quot;Orbit Path&quot;</span>: <span class="s2">&quot;182&quot;</span>,
+        <span class="s2">&quot;Center Longitude&quot;</span>: <span class="s2">&quot;20&amp;amp;deg;20&#39;18.46&amp;quot;E&quot;</span>,
+        <span class="s2">&quot;SW Corner Lat&quot;</span>: <span class="s2">&quot;24&amp;amp;deg;44&#39;15.46&amp;quot;N&quot;</span>,
+        <span class="s2">&quot;Sun Azimuth&quot;</span>: <span class="s2">&quot;107.463027&quot;</span>
+      <span class="o">}</span>,
+      <span class="s2">&quot;modifiedDate&quot;</span>: <span class="s2">&quot;2017-03-22&quot;</span>,
+      <span class="s2">&quot;startTime&quot;</span>: <span class="s2">&quot;2015-04-03&quot;</span>,
+      <span class="s2">&quot;sceneBounds&quot;</span>: <span class="s2">&quot;20.220225,24.787699,20.489455,25.663285&quot;</span>,
+      <span class="s2">&quot;ordered&quot;</span>: false,
+      <span class="s2">&quot;entityId&quot;</span>: <span class="s2">&quot;EO1H1830422015093110KF_TR2_01&quot;</span>,
+      <span class="s2">&quot;endTime&quot;</span>: <span class="s2">&quot;2015-04-03&quot;</span>,
+      <span class="s2">&quot;lowerRightCoordinate&quot;</span>: <span class="o">{</span>
+        <span class="s2">&quot;latitude&quot;</span>: <span class="m">24</span>.787699,
+        <span class="s2">&quot;longitude&quot;</span>: <span class="m">20</span>.293527
+      <span class="o">}</span>,
+      <span class="s2">&quot;bulkOrdered&quot;</span>: <span class="nb">false</span>
+    <span class="o">}</span>
+  <span class="o">]</span>,
+  <span class="s2">&quot;api_version&quot;</span>: <span class="s2">&quot;1.2.1&quot;</span>,
+  <span class="s2">&quot;error&quot;</span>: <span class="s2">&quot;&quot;</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="batch-download">
+<h2>Batch Download<a class="headerlink" href="#batch-download" title="Permalink to this headline">¶</a></h2>
+<p>Allows for batch downloading from a particular dataset from the provided <cite>bayleaf search</cite> response.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Although Bayleef currently supports searching multiple datasets, programatic downloading of datasets in a structured format is only supported for a limited number of datasets. This is because each dataset needs a handwritten driver to define the download structure.</p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Pipe the output of the search into batch-download, this will download the results</span>
+bayleef search <span class="o">[</span>dataset<span class="o">]</span> --start-date <span class="o">[</span>start date<span class="o">]</span> --end-date <span class="o">[</span>end date<span class="o">]</span> --longitude <span class="o">[</span>lng<span class="o">]</span> --latitude <span class="o">[</span>lat<span class="o">]</span> --node <span class="o">[</span>node<span class="o">]</span> <span class="p">|</span> bayleef batch-download <span class="o">[</span>root<span class="o">]</span> <span class="o">[</span>node<span class="o">]</span> <span class="o">[</span>response<span class="o">]</span> <span class="p">|</span>
+
+<span class="c1"># An alternative approach, write search results to a file</span>
+bayleef search <span class="o">[</span>dataset<span class="o">]</span> --start-date <span class="o">[</span>start date<span class="o">]</span> --end-date <span class="o">[</span>end date<span class="o">]</span> --longitude <span class="o">[</span>lng<span class="o">]</span> --latitude <span class="o">[</span>lat<span class="o">]</span> --node <span class="o">[</span>node<span class="o">]</span> &gt; resp.json
+cat resp.json <span class="p">|</span> bayleef batch-download <span class="o">[</span>root<span class="o">]</span> <span class="o">[</span>node<span class="o">]</span> <span class="o">[</span>response<span class="o">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="download-options">
+<h2>Download Options<a class="headerlink" href="#download-options" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bayleef download-options <span class="o">[</span>dataset<span class="o">]</span> <span class="o">[</span>entity/scene id<span class="o">]</span> --node <span class="o">[</span>node<span class="o">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="download-url">
+<h2>Download URL<a class="headerlink" href="#download-url" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>bayleef download-url <span class="o">[</span>dataset<span class="o">]</span> <span class="o">[</span>entity/scene id<span class="o">]</span> --node <span class="o">[</span>node<span class="o">]</span> --product <span class="o">[</span>product<span class="o">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<p>Bayleef’s CLI simply dispatches to a number of python functions</p>
+<span class="target" id="module-bayleef.scripts.cli"></span><dl class="function">
+<dt id="bayleef.scripts.cli.get_node">
+<code class="descclassname">bayleef.scripts.cli.</code><code class="descname">get_node</code><span class="sig-paren">(</span><em>dataset</em>, <em>node=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayleef/scripts/cli.html#get_node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bayleef.scripts.cli.get_node" title="Permalink to this definition">¶</a></dt>
+<dd><div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">Move to more appropriate place in module.</p>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api.html" class="btn btn-neutral float-right" title="Bayleef API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral" title="Bayleef" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Amit Kapadia.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.2.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

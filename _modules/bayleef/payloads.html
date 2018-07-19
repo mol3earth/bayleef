@@ -1,0 +1,625 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>bayleef.payloads &mdash; bayleef 0.2.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> bayleef
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.2.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/cli.html">Bayleef CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/api.html">Bayleef API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/payloads.html">Bayleef Payloads</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/catalog.html">Catalog</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">bayleef</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>bayleef.payloads</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for bayleef.payloads</h1><div class="highlight"><pre>
+<span></span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">bayleef</span> <span class="k">import</span> <span class="n">CATALOG_NODES</span><span class="p">,</span> <span class="n">USGSDependencyRequired</span>
+
+
+<div class="viewcode-block" id="clear_bulk_download_order"><a class="viewcode-back" href="../../reference/payloads.html#bayleef.payloads.clear_bulk_download_order">[docs]</a><span class="k">def</span> <span class="nf">clear_bulk_download_order</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This method is used to clear bulk download order information from the item basket.</span>
+
+<span class="sd">    :param dataset:</span>
+
+<span class="sd">    :param node:</span>
+
+<span class="sd">    :param api_key:</span>
+<span class="sd">        API key is required.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="clear_order"><a class="viewcode-back" href="../../reference/payloads.html#bayleef.payloads.clear_order">[docs]</a><span class="k">def</span> <span class="nf">clear_order</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This method is used to clear order information from the item basket.</span>
+
+<span class="sd">    :param dataset:</span>
+
+<span class="sd">    :param node:</span>
+
+<span class="sd">    :param api_key:</span>
+<span class="sd">        API key is required.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="dataset_fields"><a class="viewcode-back" href="../../reference/payloads.html#bayleef.payloads.dataset_fields">[docs]</a><span class="k">def</span> <span class="nf">dataset_fields</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This request is used to return the metadata filter</span>
+<span class="sd">    fields for the specified dataset. These values can</span>
+<span class="sd">    be used as additional criteria when submitting search</span>
+<span class="sd">    and hit queries.</span>
+
+<span class="sd">    :param dataset:</span>
+
+<span class="sd">    :param node:</span>
+
+<span class="sd">    :param api_key:</span>
+<span class="sd">        API key is not required.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span>
+        <span class="s2">&quot;datasetName&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">,</span>
+        <span class="s2">&quot;node&quot;</span><span class="p">:</span> <span class="n">node</span><span class="p">,</span>
+        <span class="s2">&quot;apiKey&quot;</span><span class="p">:</span> <span class="n">api_key</span>
+    <span class="p">})</span></div>
+
+
+<div class="viewcode-block" id="datasets"><a class="viewcode-back" href="../../reference/payloads.html#bayleef.payloads.datasets">[docs]</a><span class="k">def</span> <span class="nf">datasets</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">ll</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ur</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This method is used to find datasets available for searching.</span>
+<span class="sd">    By passing no parameters except node, all available datasets</span>
+<span class="sd">    are returned. Additional parameters such as temporal range</span>
+<span class="sd">    and spatial bounding box can be used to find datasets that</span>
+<span class="sd">    provide more specific data. The dataset name parameter can</span>
+<span class="sd">    be used to limit the results based on matching the supplied</span>
+<span class="sd">    value against the dataset name with assumed wildcards at the</span>
+<span class="sd">    beginning and end. All parameters are optional except for</span>
+<span class="sd">    the &#39;node&#39; parameter.</span>
+
+<span class="sd">    :param dataset:</span>
+<span class="sd">        Dataset Identifier</span>
+
+<span class="sd">    :param ll:</span>
+<span class="sd">        Lower left corner of an AOI bounding box - in decimal form</span>
+<span class="sd">        Longitude/Latitude dictionary</span>
+
+<span class="sd">        e.g. { &quot;longitude&quot;: 0.0, &quot;latitude&quot;: 0.0 }</span>
+
+<span class="sd">    :param ur:</span>
+<span class="sd">        Upper right corner of an AOI bounding box - in decimal form</span>
+<span class="sd">        Longitude/Latitude dictionary</span>
+
+<span class="sd">        e.g. { &quot;longitude&quot;: 0.0, &quot;latitude&quot;: 0.0 }</span>
+
+<span class="sd">    :param start_date:</span>
+<span class="sd">        Used for searching scene acquisition - will accept anything</span>
+<span class="sd">        that the PHP strtotime function can understand</span>
+
+<span class="sd">    :param end_date:</span>
+<span class="sd">        Used for searching scene acquisition - will accept anything</span>
+<span class="sd">        that the PHP strtotime function can understand</span>
+
+<span class="sd">    :param node:</span>
+<span class="sd">        The requested Catalog</span>
+
+<span class="sd">    :param api_key:</span>
+<span class="sd">        API key is not required.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;node&quot;</span><span class="p">:</span> <span class="n">node</span><span class="p">,</span>
+        <span class="s2">&quot;apiKey&quot;</span><span class="p">:</span> <span class="n">api_key</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">dataset</span><span class="p">:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;datasetName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataset</span>
+
+    <span class="k">if</span> <span class="n">ll</span> <span class="ow">and</span> <span class="n">ur</span><span class="p">:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;lowerLeft&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="n">ll</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="n">ll</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span>
+        <span class="p">}</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;upperRight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="n">ur</span><span class="p">[</span><span class="s2">&quot;latitude&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="n">ur</span><span class="p">[</span><span class="s2">&quot;longitude&quot;</span><span class="p">]</span>
+        <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">start_date</span><span class="p">:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;startDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_date</span>
+
+    <span class="k">if</span> <span class="n">end_date</span><span class="p">:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;endDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_date</span>
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="download"><a class="viewcode-back" href="../../reference/payloads.html#bayleef.payloads.download">[docs]</a><span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">entityids</span><span class="p">,</span> <span class="n">products</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The use of this request will be to obtain valid data download URLs.</span>
+
+<span class="sd">    :param dataset:</span>
+
+<span class="sd">    :param entityIds:</span>
+<span class="sd">        list</span>
+
+<span class="sd">    :param products:</span>
+<span class="sd">        list</span>
+
+<span class="sd">    :param node:</span>
+
+<span class="sd">    :param api_key:</span>
+<span class="sd">        API key is required.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;datasetName&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">,</span>
+        <span class="s2">&quot;node&quot;</span><span class="p">:</span> <span class="n">node</span><span class="p">,</span>
+        <span class="s2">&quot;apiKey&quot;</span><span class="p">:</span> <span class="n">api_key</span><span class="p">,</span>
+        <span class="s2">&quot;entityIds&quot;</span><span class="p">:</span> <span class="n">entityids</span><span class="p">,</span>
+        <span class="s2">&quot;products&quot;</span><span class="p">:</span> <span class="n">products</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="download_options"><a class="viewcode-back" href="../../reference/payloads.html#bayleef.payloads.download_options">[docs]</a><span class="k">def</span> <span class="nf">download_options</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">entityids</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The use of the download options request is to discover the different download</span>
+<span class="sd">    options for each scene. Some download options may exist but still be unavailable</span>
+<span class="sd">    due to disk usage and many other factors. If a download is unavailable</span>
+<span class="sd">    it may need to be ordered.</span>
+
+<span class="sd">    :param dataset:</span>
+
+<span class="sd">    :param node:</span>
+
+<span class="sd">    :param entityIds:</span>
+
+<span class="sd">    :param api_key:</span>
+<span class="sd">        API key is not required.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;apiKey&quot;</span><span class="p">:</span> <span class="n">api_key</span><span class="p">,</span>
+        <span class="s2">&quot;datasetName&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">,</span>
+        <span class="s2">&quot;node&quot;</span><span class="p">:</span> <span class="n">node</span><span class="p">,</span>
+        <span class="s2">&quot;entityIds&quot;</span><span class="p">:</span> <span class="n">entityids</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_bulk_download_products"><a class="viewcode-back" href="../../reference/payloads.html#bayleef.payloads.get_bulk_download_products">[docs]</a><span class="k">def</span> <span class="nf">get_bulk_download_products</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">entityids</span><span class="p">,</span> <span class="n">api_key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve bulk download products on a scene-by-scene basis.</span>
+
+<span class="sd">    :param dataset:</span>
+
+<span class="sd">    :param node:</span>
+
+<span class="sd">    :param entityid:</span>
+<span class="sd">        String or list of strings.</span>
+
+<span class="sd">    :param api_key:</span>
+<span class="sd">        API key is required.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="get_order_products"><a class="viewcode-back" href="../../reference/payloads.html#bayleef.payloads.get_order_products">[docs]</a><span class="k">def</span> <span class="nf">get_order_products</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">entityids</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve orderable products on a scene-by-scene basis.</span>
+
+<span class="sd">    :param dataset:</span>
+
+<span class="sd">    :param node:</span>
+
+<span class="sd">    :param entityid:</span>
+
+<span class="sd">    :param api_key:</span>
+<span class="sd">        API key is required.</span>
+
+<span class="sd">    .. todo:: Support multiple scene request.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="item_basket"><a class="viewcode-back" href="../../reference/payloads.html#bayleef.payloads.item_basket">[docs]</a><span class="k">def</span> <span class="nf">item_basket</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the current item basket for the current user.</span>
+
+<span class="sd">    :param api_key:</span>
+<span class="sd">        API key is required.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+
+<div class="viewcode-block" id="login"><a class="viewcode-back" href="../../reference/payloads.html#bayleef.payloads.login">[docs]</a><span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This method requires SSL be used due to the sensitive nature of</span>
+<span class="sd">    users passwords. Upon a successful login, an API key will be</span>
+<span class="sd">    returned. This key will be active for one hour and should be</span>
+<span class="sd">    destroyed upon final use of the service by calling the logout</span>
+<span class="sd">    method. Users must have &quot;Machine to Machine&quot; access based on</span>
+<span class="sd">    a user-based role in the users profile.</span>
+
+<span class="sd">    :param username:</span>
+
+<span class="sd">    :param password:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span>
+        <span class="s2">&quot;password&quot;</span><span class="p">:</span> <span class="n">password</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="logout"><a class="viewcode-back" href="../../reference/payloads.html#bayleef.payloads.logout">[docs]</a><span class="k">def</span> <span class="nf">logout</span><span class="p">(</span><span class="n">api_key</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove the users API key from being used in the future.</span>
+
+<span class="sd">    :param api_key:</span>
+<span class="sd">        API key is required.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;apiKey&quot;</span><span class="p">:</span> <span class="n">api_key</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="metadata"><a class="viewcode-back" href="../../reference/payloads.html#bayleef.payloads.metadata">[docs]</a><span class="k">def</span> <span class="nf">metadata</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">entityids</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The use of the metadata request is intended for those who have</span>
+<span class="sd">    acquired scene IDs from a different source. It will return the</span>
+<span class="sd">    same metadata that is available via the search request.</span>
+
+<span class="sd">    :param dataset:</span>
+
+<span class="sd">    :param node:</span>
+
+<span class="sd">    :param sceneid:</span>
+
+<span class="sd">    :param api_key:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;apiKey&quot;</span><span class="p">:</span> <span class="n">api_key</span><span class="p">,</span>
+        <span class="s2">&quot;datasetName&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">,</span>
+        <span class="s2">&quot;node&quot;</span><span class="p">:</span> <span class="n">node</span><span class="p">,</span>
+        <span class="s2">&quot;entityIds&quot;</span><span class="p">:</span> <span class="n">entityids</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">remove_bulk_download_scene</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">remove_order_scene</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<div class="viewcode-block" id="search"><a class="viewcode-back" href="../../reference/payloads.html#bayleef.payloads.search">[docs]</a><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span>
+    <span class="n">lat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lng</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">distance</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+    <span class="n">ll</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ur</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">where</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_results</span><span class="o">=</span><span class="mi">50000</span><span class="p">,</span>
+    <span class="n">starting_number</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">sort_order</span><span class="o">=</span><span class="s2">&quot;DESC&quot;</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :param dataset:</span>
+
+<span class="sd">    :param node:</span>
+
+<span class="sd">    :param lat:</span>
+
+<span class="sd">    :param lng:</span>
+
+<span class="sd">    :param ll:</span>
+
+<span class="sd">    :param distance:</span>
+
+<span class="sd">    :param ur:</span>
+
+<span class="sd">    :param start_date:</span>
+
+<span class="sd">    :param end_date:</span>
+
+<span class="sd">    :param where:</span>
+<span class="sd">        Specify additional search criteria</span>
+
+<span class="sd">    :param max_results:</span>
+
+<span class="sd">    :param starting_number:</span>
+
+<span class="sd">    :param sort_order:</span>
+
+<span class="sd">    :param api_key:</span>
+<span class="sd">        API key is not required.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;datasetName&quot;</span><span class="p">:</span> <span class="n">dataset</span><span class="p">,</span>
+        <span class="s2">&quot;node&quot;</span><span class="p">:</span> <span class="n">node</span><span class="p">,</span>
+        <span class="s2">&quot;apiKey&quot;</span><span class="p">:</span> <span class="n">api_key</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Latitude and longitude take precedence over ll and ur</span>
+    <span class="k">if</span> <span class="n">lat</span> <span class="ow">and</span> <span class="n">lng</span><span class="p">:</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">pyproj</span>
+            <span class="kn">from</span> <span class="nn">shapely</span> <span class="k">import</span> <span class="n">geometry</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">USGSDependencyRequired</span><span class="p">(</span><span class="s2">&quot;Shapely and PyProj are required for spatial searches.&quot;</span><span class="p">)</span>
+
+        <span class="n">prj</span> <span class="o">=</span> <span class="n">pyproj</span><span class="o">.</span><span class="n">Proj</span><span class="p">(</span><span class="n">proj</span><span class="o">=</span><span class="s1">&#39;aeqd&#39;</span><span class="p">,</span> <span class="n">lat_0</span><span class="o">=</span><span class="n">lat</span><span class="p">,</span> <span class="n">lon_0</span><span class="o">=</span><span class="n">lng</span><span class="p">)</span>
+        <span class="n">half_distance</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">distance</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">box</span><span class="p">(</span><span class="o">-</span><span class="n">half_distance</span><span class="p">,</span> <span class="o">-</span><span class="n">half_distance</span><span class="p">,</span> <span class="n">half_distance</span><span class="p">,</span> <span class="n">half_distance</span><span class="p">)</span>
+
+        <span class="n">lngs</span><span class="p">,</span> <span class="n">lats</span> <span class="o">=</span> <span class="n">prj</span><span class="p">(</span><span class="o">*</span><span class="n">box</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">xy</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">ll</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="o">*</span><span class="n">lngs</span><span class="p">),</span> <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="nb">min</span><span class="p">(</span><span class="o">*</span><span class="n">lats</span><span class="p">)</span> <span class="p">}</span>
+        <span class="n">ur</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;longitude&quot;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="o">*</span><span class="n">lngs</span><span class="p">),</span> <span class="s2">&quot;latitude&quot;</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="o">*</span><span class="n">lats</span><span class="p">)</span> <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">ll</span> <span class="ow">and</span> <span class="n">ur</span><span class="p">:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;lowerLeft&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ll</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;upperRight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ur</span>
+
+    <span class="k">if</span> <span class="n">start_date</span><span class="p">:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;startDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_date</span>
+
+    <span class="k">if</span> <span class="n">end_date</span><span class="p">:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;endDate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_date</span>
+
+    <span class="k">if</span> <span class="n">where</span><span class="p">:</span>
+
+        <span class="c1"># TODO: Support more than AND key/value equality queries</span>
+        <span class="c1"># usgs search --node EE LANDSAT_8_C1 --start-date 20170410 --end-date 20170411 --where wrs-row 032 | jq &quot;&quot;</span>
+        <span class="c1"># LC81810322017101LGN00</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;additionalCriteria&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;filterType&quot;</span><span class="p">:</span> <span class="s2">&quot;and&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;childFilters&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;filterType&quot;</span><span class="p">:</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;fieldId&quot;</span><span class="p">:</span> <span class="n">field_id</span><span class="p">,</span>
+                    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span>
+                    <span class="s2">&quot;operand&quot;</span><span class="p">:</span> <span class="s2">&quot;=&quot;</span>
+                <span class="p">}</span>
+                <span class="k">for</span> <span class="n">field_id</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">where</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">max_results</span><span class="p">:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;maxResults&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_results</span>
+
+    <span class="k">if</span> <span class="n">starting_number</span><span class="p">:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;startingNumber&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">starting_number</span>
+
+    <span class="k">if</span> <span class="n">sort_order</span><span class="p">:</span>
+        <span class="n">payload</span><span class="p">[</span><span class="s2">&quot;sortOrder&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sort_order</span>
+
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">submit_bulk_order</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">submit_order</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">update_bulk_download_scene</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+
+<span class="k">def</span> <span class="nf">update_order_scene</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, Amit Kapadia.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.2.1',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
