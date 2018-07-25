@@ -168,7 +168,7 @@ Contents:
    reference/cli
    reference/api
    reference/payloads
-   reference/catalog.rst
+   reference/catalog
 
 
 Indices and tables
