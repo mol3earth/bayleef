@@ -116,11 +116,14 @@ SET default_tablespace = '';
 
 SET default_with_oids = false;
 
+drop SCHEMA master CASCADE;
+
 CREATE SCHEMA master;
 
 --
 -- Name: image_attributes; Type: TABLE; Schema: public; Owner: kelvin
 --
+
 
 CREATE TABLE master.image_attributes (
    id text NOT NULL,
@@ -130,14 +133,14 @@ CREATE TABLE master.image_attributes (
    begin_date text,
    calibrationname text,
    calibrationversion text,
-   completiondate TIMESTAMP WITHOUT TIMEZONE,
-   creationdate date,
+   completiondate TIMESTAMP,
+   creationdate TIMESTAMP,
    datausersguidesource text,
    data_quality text,
    data_set text,
    datum text,
    day_night_flag char,
-   end_date date,
+   end_date TIMESTAMP,
    experimentname text,
    flightcomment text,
    flightdate text,
@@ -201,15 +204,15 @@ CREATE TABLE master.images (
   SensorAzimuthAngle text,
   SensorZenithAngle text,
   SolarAzimuthAngle text,
-  SolarZenithAngle text,
+  SolarZenithAngle text
 );
 
-COMMENT ON COLUMN images.master IS 'Original HDF file given from master';
+COMMENT ON COLUMN master.images.master IS 'Original HDF file given from master';
 
-ALTER TABLE ONLY landsat_8_c1.image_attributes
-    ADD CONSTRAINT image_attributes_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY master.image_attributes
+    ADD CONSTRAINT master_image_attributes_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY landsat_8_c1.images
-    ADD CONSTRAINT image_attributes_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY master.images
+    ADD CONSTRAINT master_images_pkey PRIMARY KEY (id);
 
-CREATE INDEX idx_images_geom ON landsat_8_c1.images USING gist (geom);
+CREATE INDEX idx_images_geom ON master.images USING gist (geom);
