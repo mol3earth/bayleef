@@ -29,9 +29,6 @@ logger = logging.getLogger('bayleef-cli')
 logger.setLevel(logging.INFO)
 
 def get_node(dataset, node=None):
-    """
-    .. todo:: Move to more appropriate place in module.
-    """
 
     if node is None:
 
@@ -124,8 +121,8 @@ def bayleef():
 
 
 @click.command()
-@click.argument("username", envvar='USGS_USERNAME')
-@click.argument("password", envvar='USGS_PASSWORD')
+@click.argument("username", envvar='USGS_USERNAME', help="username for an account with the USGS’s EROS service")
+@click.argument("password", envvar='USGS_PASSWORD', help="password for an account with the USGS’s EROS service")
 def login(username, password):
     api_key = api.login(username, password)
     click.echo(api_key)
@@ -137,23 +134,25 @@ def logout():
 
 
 @click.command()
-@click.argument("node")
-@click.option("--start-date")
-@click.option("--end-date")
+@click.argument("node", help="Name of the catalog to search in (e.g. cwic for CWIC/LSI Explorer, ee for Earth Explorer, ect.), see docs for a list of available nodes")
+@click.option("--start-date", help="Start date for when a scene has been acquired. In the format of yyyy-mm-dd")
+@click.option("--end-date", help="End date for when a scene has been acquired. In the format of yyyy-mm-dd")
 def datasets(node, start_date, end_date):
     data = api.datasets(None, node, start_date=start_date, end_date=end_date)
     click.echo(json.dumps(data))
 
 
 @click.command()
-@click.argument("dataset")
+@click.argument("dataset", help="USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)")
 @click.argument("scene-ids", nargs=-1)
 @node_opt
 @click.option("--extended", is_flag=True, help="Probe for more metadata.")
 @click.option('--geojson', is_flag=True)
 @api_key_opt
 def metadata(dataset, scene_ids, node, extended, geojson, api_key):
-
+    """
+    Request metadata for a given scene in a USGS dataset.
+    """
     if len(scene_ids) == 0:
         scene_ids = map(lambda s: s.strip(), click.open_file('-').readlines())
 
@@ -176,13 +175,13 @@ def dataset_fields(dataset, node):
 
 
 @click.command()
-@click.argument("dataset")
+@click.argument("dataset", help="USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)")
 @node_opt
 @click.argument("aoi", default="-", required=False)
-@click.option("--start-date")
-@click.option("--end-date")
-@click.option("--lng")
-@click.option("--lat")
+@click.option("--start-date", help="Start date for when a scene has been acquired. In the format of yyyy-mm-dd")
+@click.option("--end-date", help="End date for when a scene has been acquired. In the format of yyyy-mm-dd")
+@click.option("--lng", help="Longitude")
+@click.option("--lat", help="Latitude")
 @click.option("--dist", help="Radius - in units of meters - used to search around the specified longitude/latitude.", default=100)
 @click.option("--lower-left", nargs=2, help="Longitude/latitude specifying the lower left of the search window")
 @click.option("--upper-right", nargs=2, help="Longitude/latitude specifying the lower left of the search window")
@@ -191,7 +190,9 @@ def dataset_fields(dataset, node):
 @click.option("--extended", is_flag=True, help="Probe for more metadata.")
 @api_key_opt
 def search(dataset, node, aoi, start_date, end_date, lng, lat, dist, lower_left, upper_right, where, geojson, extended, api_key):
-
+    """
+    Search the database for images that match parameters passed.
+    """
     node = get_node(dataset, node)
 
     if aoi == "-":
@@ -231,7 +232,7 @@ def search(dataset, node, aoi, start_date, end_date, lng, lat, dist, lower_left,
 
 
 @click.command()
-@click.argument("dataset")
+@click.argument("dataset", help="USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)")
 @click.argument("scene-ids", nargs=-1)
 @node_opt
 @api_key_opt
@@ -243,7 +244,7 @@ def download_options(dataset, scene_ids, node, api_key):
 
 
 @click.command()
-@click.argument("dataset")
+@click.argument("dataset", help="USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)")
 @click.argument("scene_ids", nargs=-1)
 @click.option("--product", nargs=1, required=True)
 @node_opt
@@ -256,9 +257,12 @@ def download_url(dataset, scene_ids, product, node, api_key):
 
 
 @click.command()
-@click.argument("root")
+@click.argument("root", help="data directory to store downloads in")
 @node_opt
 def batch_download(root, node):
+    """
+    Used with the search function to download the results returned from search
+    """
     def download_from_result(scene, root):
         scene_id = scene['entityId']
         temp_file = '{}.tar.gz'.format(scene_id)
@@ -305,14 +309,17 @@ def batch_download(root, node):
 
 
 @click.command()
-@click.argument("dataset")
-@click.argument("root")
-@click.argument("db")
-@click.option("--host", default="localhost")
-@click.option("--port", default="5432")
-@click.option("--user")
-@click.option("--password")
+@click.argument("dataset", help="USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)")
+@click.argument("root", help="data directory to store downloads in")
+@click.argument("db", help="name of database to upload to")
+@click.option("--host", default="localhost", help="host id")
+@click.option("--port", default="5432", help="port number")
+@click.option("--user", help="username for database")
+@click.option("--password", help="password for database")
 def to_sql(db, dataset, root, host, port, user, password):
+    """
+    Upload the dataset to a database
+    """
     if not dataset in func_map.keys():
         logger.error("{} is not a valid dataset".format(dataset))
 

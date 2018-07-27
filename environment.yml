@@ -1,0 +1,10 @@
+name: bayleef
+channels:
+  - conda-forge
+dependencies:
+  - pvl
+  - sqlalchemy
+  - geopandas
+  - geoalchemy2
+  - pip:
+    - wget
