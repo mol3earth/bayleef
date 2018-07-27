@@ -84,7 +84,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../reference/cli.html">Bayleef CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/api.html">Bayleef API</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/payloads.html">Bayleef Payloads</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../reference/catalog.html">Catalog</a></li>
 </ul>
 
             
@@ -166,7 +165,6 @@
 
 
 <span class="k">def</span> <span class="nf">_get_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">):</span>
-
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">TMPFILE</span><span class="p">):</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">TMPFILE</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">api_key</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
@@ -189,10 +187,15 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Parse metadata returned from the metadataUrl of a USGS scene.</span>
 
-<span class="sd">    :param scene:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    scene : dict</span>
 <span class="sd">        Dictionary representation of a USGS scene</span>
-<span class="sd">    :param resp:</span>
+<span class="sd">    resp :</span>
 <span class="sd">        Response object from requests/grequests</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    scene :</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
     <span class="n">items</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;eemetadata:metadataFields/eemetadata:metadataField&quot;</span><span class="p">,</span> <span class="n">NAMESPACES</span><span class="p">)</span>
@@ -206,8 +209,14 @@
 <span class="sd">    Sends multiple non-blocking requests. Returns</span>
 <span class="sd">    a list of responses.</span>
 
-<span class="sd">    :param urls:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    urls : list</span>
 <span class="sd">        List of urls</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    responses : list</span>
+<span class="sd">        list of responses</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">session</span> <span class="o">=</span> <span class="n">FuturesSession</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
     <span class="n">futures</span> <span class="o">=</span> <span class="p">[</span>
@@ -271,6 +280,20 @@
 <span class="sd">    Additionally, the response has no indiction which URL is associated</span>
 <span class="sd">    with which scene/entity id. The URL can be parsed, but the structure</span>
 <span class="sd">    varies depending on the product.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : str</span>
+<span class="sd">        The specific collection to download from (e.g. LANDSAT_8_C1 for landsat 8 collection 1), see docs for a list of available datasets</span>
+<span class="sd">    node : str</span>
+<span class="sd">        Name of the catalog to search in (e.g. cwic for CWIC/LSI Explorer, ee for Earth Explorer, ect.), see docs for a list of available nodes</span>
+<span class="sd">    entityids :</span>
+<span class="sd">    product : str, optional</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    response : json</span>
+<span class="sd">        json</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">api_key</span> <span class="o">=</span> <span class="n">_get_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
@@ -288,8 +311,21 @@
     <span class="k">return</span> <span class="n">response</span></div>
 
 
-<span class="k">def</span> <span class="nf">download_options</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">entityids</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="download_options"><a class="viewcode-back" href="../../reference/api.html#bayleef.api.download_options">[docs]</a><span class="k">def</span> <span class="nf">download_options</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">entityids</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : str</span>
+<span class="sd">        The specific collection to download from (e.g. LANDSAT_8_C1 for landsat 8 collection 1), see docs for a list of available datasets</span>
+<span class="sd">    node : str</span>
+<span class="sd">        Name of the catalog to search in (e.g. cwic for CWIC/LSI Explorer, ee for Earth Explorer, ect.), see docs for a list of available nodes</span>
+<span class="sd">    entityids :</span>
 
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    response : json</span>
+<span class="sd">        json</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">api_key</span> <span class="o">=</span> <span class="n">_get_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
 
     <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/downloadoptions&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">USGS_API</span><span class="p">)</span>
@@ -302,7 +338,7 @@
 
     <span class="n">_check_for_usgs_error</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">response</span>
+    <span class="k">return</span> <span class="n">response</span></div>
 
 
 <span class="k">def</span> <span class="nf">get_bulk_download_products</span><span class="p">():</span>
@@ -320,9 +356,23 @@
 <span class="k">def</span> <span class="nf">item_basket</span><span class="p">():</span>
     <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
+<div class="viewcode-block" id="login"><a class="viewcode-back" href="../../reference/api.html#bayleef.api.login">[docs]</a><span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Logs a user in using their username and password for the USGS’s EROS service</span>
 
-<span class="k">def</span> <span class="nf">login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    username : str</span>
+<span class="sd">        username for an account with the USGS’s EROS service</span>
+<span class="sd">    password : str</span>
+<span class="sd">        password for an account with the USGS’s EROS service</span>
+<span class="sd">    save : bool, optional</span>
+<span class="sd">        whether the credentials of the session should be saved as a temp file</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    response : json</span>
+<span class="sd">        json with response from server after login request</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/login&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">USGS_API</span><span class="p">)</span>
     <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;jsonRequest&quot;</span><span class="p">:</span> <span class="n">payloads</span><span class="o">.</span><span class="n">login</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
@@ -342,11 +392,18 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">TMPFILE</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">response</span>
+    <span class="k">return</span> <span class="n">response</span></div>
 
 
-<span class="k">def</span> <span class="nf">logout</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="logout"><a class="viewcode-back" href="../../reference/api.html#bayleef.api.logout">[docs]</a><span class="k">def</span> <span class="nf">logout</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Logs out a user and removes credentials from session.</span>
 
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    response : json</span>
+<span class="sd">        json with response from server after logout request</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">api_key</span> <span class="o">=</span> <span class="n">_get_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
 
     <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/logout&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">USGS_API</span><span class="p">)</span>
@@ -361,19 +418,26 @@
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">TMPFILE</span><span class="p">):</span>
         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">TMPFILE</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">response</span>
+    <span class="k">return</span> <span class="n">response</span></div>
 
 
 <div class="viewcode-block" id="metadata"><a class="viewcode-back" href="../../reference/api.html#bayleef.api.metadata">[docs]</a><span class="k">def</span> <span class="nf">metadata</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">entityids</span><span class="p">,</span> <span class="n">extended</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Request metadata for a given scene in a USGS dataset.</span>
 
-<span class="sd">    :param dataset:</span>
-<span class="sd">    :param node:</span>
-<span class="sd">    :param entityids:</span>
-<span class="sd">    :param extended:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : str</span>
+<span class="sd">        The specific collection to download from (e.g. LANDSAT_8_C1 for landsat 8 collection 1), see docs for a list of available datasets</span>
+<span class="sd">    node : str</span>
+<span class="sd">        Name of the catalog to search in (e.g. cwic for CWIC/LSI Explorer, ee for Earth Explorer, ect.), see docs for a list of available nodes</span>
+<span class="sd">    entityids :</span>
+<span class="sd">    extended : bool, optional</span>
 <span class="sd">        Send a second request to the metadata url to get extended metadata on the scene.</span>
-<span class="sd">    :param api_key:</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    response : json</span>
+<span class="sd">        json containing metadata</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">api_key</span> <span class="o">=</span> <span class="n">_get_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
 
@@ -405,43 +469,48 @@
 <div class="viewcode-block" id="search"><a class="viewcode-back" href="../../reference/api.html#bayleef.api.search">[docs]</a><span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">lat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lng</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">distance</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">ll</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ur</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">start_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">end_date</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
            <span class="n">where</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_results</span><span class="o">=</span><span class="mi">50000</span><span class="p">,</span> <span class="n">starting_number</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">sort_order</span><span class="o">=</span><span class="s2">&quot;DESC&quot;</span><span class="p">,</span> <span class="n">extended</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Search the database for images that match parameters passed.</span>
 
-<span class="sd">    :param dataset:</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : str</span>
 <span class="sd">        USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)</span>
-<span class="sd">    :param node:</span>
+<span class="sd">    node : str</span>
 <span class="sd">        USGS node representing a dataset catalog (e.g. CWIC, EE, HDDS, LPVS)</span>
-<span class="sd">    :param lat:</span>
+<span class="sd">    lat : double, optional</span>
 <span class="sd">        Latitude</span>
-<span class="sd">    :param lng:</span>
+<span class="sd">    lng : double, optional</span>
 <span class="sd">        Longitude</span>
-<span class="sd">    :param distance:</span>
+<span class="sd">    distance : int, optional</span>
 <span class="sd">        Distance in meters used to for a radial search</span>
-<span class="sd">    :param ll:</span>
+<span class="sd">    ll : dict, optional</span>
 <span class="sd">        Dictionary of longitude/latitude coordinates for the lower left corner</span>
 <span class="sd">        of a bounding box search. e.g. { &quot;longitude&quot;: 0.0, &quot;latitude&quot;: 0.0 }</span>
-<span class="sd">    :param ur:</span>
+<span class="sd">    ur : dict, optional</span>
 <span class="sd">        Dictionary of longitude/latitude coordinates for the upper right corner</span>
 <span class="sd">        of a bounding box search. e.g. { &quot;longitude&quot;: 0.0, &quot;latitude&quot;: 0.0 }</span>
-<span class="sd">    :param start_date:</span>
-<span class="sd">        Start date for when a scene has been acquired</span>
-<span class="sd">    :param end_date:</span>
-<span class="sd">        End date for when a scene has been acquired</span>
-<span class="sd">    :where:</span>
+<span class="sd">    start_date : str, optional</span>
+<span class="sd">        Start date for when a scene has been acquired. In the format of yyyy-mm-dd</span>
+<span class="sd">    end_date : str, optional</span>
+<span class="sd">        End date for when a scene has been acquired. In the format of yyyy-mm-dd</span>
+<span class="sd">    where : dict, optional</span>
 <span class="sd">        Dictionary representing key/values for finer grained conditional</span>
 <span class="sd">        queries. Only a subset of metadata fields are supported. Available</span>
 <span class="sd">        fields depend on the value of `dataset`, and maybe be found by</span>
 <span class="sd">        submitting a dataset_fields query.</span>
-<span class="sd">    :max_results:</span>
+<span class="sd">    max_results : int, optional</span>
 <span class="sd">        Maximum results returned by the server</span>
-<span class="sd">    :starting_number:</span>
+<span class="sd">    starting_number : int, optional</span>
 <span class="sd">        Starting offset for results of a query.</span>
-<span class="sd">    :sort_order:</span>
-<span class="sd">        Order in which results are sorted. Ascending or descending w.r.t the acquisition date.</span>
-<span class="sd">    :extended:</span>
+<span class="sd">    sort_order : str, optional</span>
+<span class="sd">        Order in which results are sorted. Ascending (&quot;ASC&quot;) or descending(&quot;DESC&quot;) with reference to the acquisition date.</span>
+<span class="sd">    extended : bool, optional</span>
 <span class="sd">        Boolean flag. When true a subsequent query will be sent to the `metadataUrl` returned by</span>
 <span class="sd">        the first query.</span>
-<span class="sd">    :api_key:</span>
-<span class="sd">        API key for EROS. Required for searching.</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    response : json</span>
+<span class="sd">        json response from the search that matches the parameters given</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">api_key</span> <span class="o">=</span> <span class="n">_get_api_key</span><span class="p">(</span><span class="n">api_key</span><span class="p">)</span>
 

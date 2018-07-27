@@ -191,6 +191,91 @@ product per request.</p>
 <p>Additionally, the response has no indiction which URL is associated
 with which scene/entity id. The URL can be parsed, but the structure
 varies depending on the product.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dataset</strong> (<em>str</em>) – The specific collection to download from (e.g. LANDSAT_8_C1 for landsat 8 collection 1), see docs for a list of available datasets</li>
+<li><strong>node</strong> (<em>str</em>) – Name of the catalog to search in (e.g. cwic for CWIC/LSI Explorer, ee for Earth Explorer, ect.), see docs for a list of available nodes</li>
+<li><strong>entityids</strong> – </li>
+<li><strong>product</strong> (<em>str</em><em>, </em><em>optional</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>response</strong> – json</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">json</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bayleef.api.download_options">
+<code class="descclassname">bayleef.api.</code><code class="descname">download_options</code><span class="sig-paren">(</span><em>dataset</em>, <em>node</em>, <em>entityids</em>, <em>api_key=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayleef/api.html#download_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bayleef.api.download_options" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dataset</strong> (<em>str</em>) – The specific collection to download from (e.g. LANDSAT_8_C1 for landsat 8 collection 1), see docs for a list of available datasets</li>
+<li><strong>node</strong> (<em>str</em>) – Name of the catalog to search in (e.g. cwic for CWIC/LSI Explorer, ee for Earth Explorer, ect.), see docs for a list of available nodes</li>
+<li><strong>entityids</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>response</strong> – json</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">json</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bayleef.api.login">
+<code class="descclassname">bayleef.api.</code><code class="descname">login</code><span class="sig-paren">(</span><em>username</em>, <em>password</em>, <em>save=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayleef/api.html#login"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bayleef.api.login" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs a user in using their username and password for the USGS’s EROS service</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>username</strong> (<em>str</em>) – username for an account with the USGS’s EROS service</li>
+<li><strong>password</strong> (<em>str</em>) – password for an account with the USGS’s EROS service</li>
+<li><strong>save</strong> (<em>bool</em><em>, </em><em>optional</em>) – whether the credentials of the session should be saved as a temp file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>response</strong> – json with response from server after login request</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">json</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bayleef.api.logout">
+<code class="descclassname">bayleef.api.</code><code class="descname">logout</code><span class="sig-paren">(</span><em>api_key=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayleef/api.html#logout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bayleef.api.logout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs out a user and removes credentials from session.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>response</strong> – json with response from server after logout request</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">json</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -201,13 +286,18 @@ varies depending on the product.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>dataset</strong> – </li>
-<li><strong>node</strong> – </li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dataset</strong> (<em>str</em>) – The specific collection to download from (e.g. LANDSAT_8_C1 for landsat 8 collection 1), see docs for a list of available datasets</li>
+<li><strong>node</strong> (<em>str</em>) – Name of the catalog to search in (e.g. cwic for CWIC/LSI Explorer, ee for Earth Explorer, ect.), see docs for a list of available nodes</li>
 <li><strong>entityids</strong> – </li>
-<li><strong>extended</strong> – Send a second request to the metadata url to get extended metadata on the scene.</li>
-<li><strong>api_key</strong> – </li>
+<li><strong>extended</strong> (<em>bool</em><em>, </em><em>optional</em>) – Send a second request to the metadata url to get extended metadata on the scene.</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>response</strong> – json containing metadata</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">json</p>
 </td>
 </tr>
 </tbody>
@@ -217,46 +307,39 @@ varies depending on the product.</p>
 <dl class="function">
 <dt id="bayleef.api.search">
 <code class="descclassname">bayleef.api.</code><code class="descname">search</code><span class="sig-paren">(</span><em>dataset</em>, <em>node</em>, <em>lat=None</em>, <em>lng=None</em>, <em>distance=100</em>, <em>ll=None</em>, <em>ur=None</em>, <em>start_date=None</em>, <em>end_date=None</em>, <em>where=None</em>, <em>max_results=50000</em>, <em>starting_number=1</em>, <em>sort_order='DESC'</em>, <em>extended=False</em>, <em>api_key=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/bayleef/api.html#search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bayleef.api.search" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
+<dd><p>Search the database for images that match parameters passed.</p>
+<table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>dataset</strong> – USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)</li>
-<li><strong>node</strong> – USGS node representing a dataset catalog (e.g. CWIC, EE, HDDS, LPVS)</li>
-<li><strong>lat</strong> – Latitude</li>
-<li><strong>lng</strong> – Longitude</li>
-<li><strong>distance</strong> – Distance in meters used to for a radial search</li>
-<li><strong>ll</strong> – Dictionary of longitude/latitude coordinates for the lower left corner
+<li><strong>dataset</strong> (<em>str</em>) – USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)</li>
+<li><strong>node</strong> (<em>str</em>) – USGS node representing a dataset catalog (e.g. CWIC, EE, HDDS, LPVS)</li>
+<li><strong>lat</strong> (<em>double</em><em>, </em><em>optional</em>) – Latitude</li>
+<li><strong>lng</strong> (<em>double</em><em>, </em><em>optional</em>) – Longitude</li>
+<li><strong>distance</strong> (<em>int</em><em>, </em><em>optional</em>) – Distance in meters used to for a radial search</li>
+<li><strong>ll</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary of longitude/latitude coordinates for the lower left corner
 of a bounding box search. e.g. { “longitude”: 0.0, “latitude”: 0.0 }</li>
-<li><strong>ur</strong> – Dictionary of longitude/latitude coordinates for the upper right corner
+<li><strong>ur</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary of longitude/latitude coordinates for the upper right corner
 of a bounding box search. e.g. { “longitude”: 0.0, “latitude”: 0.0 }</li>
-<li><strong>start_date</strong> – Start date for when a scene has been acquired</li>
-<li><strong>end_date</strong> – End date for when a scene has been acquired</li>
+<li><strong>start_date</strong> (<em>str</em><em>, </em><em>optional</em>) – Start date for when a scene has been acquired. In the format of yyyy-mm-dd</li>
+<li><strong>end_date</strong> (<em>str</em><em>, </em><em>optional</em>) – End date for when a scene has been acquired. In the format of yyyy-mm-dd</li>
+<li><strong>where</strong> (<em>dict</em><em>, </em><em>optional</em>) – Dictionary representing key/values for finer grained conditional
+queries. Only a subset of metadata fields are supported. Available
+fields depend on the value of <cite>dataset</cite>, and maybe be found by
+submitting a dataset_fields query.</li>
+<li><strong>max_results</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum results returned by the server</li>
+<li><strong>starting_number</strong> (<em>int</em><em>, </em><em>optional</em>) – Starting offset for results of a query.</li>
+<li><strong>sort_order</strong> (<em>str</em><em>, </em><em>optional</em>) – Order in which results are sorted. Ascending (“ASC”) or descending(“DESC”) with reference to the acquisition date.</li>
+<li><strong>extended</strong> (<em>bool</em><em>, </em><em>optional</em>) – Boolean flag. When true a subsequent query will be sent to the <cite>metadataUrl</cite> returned by
+the first query.</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Where:</th><td class="field-body"><p class="first">Dictionary representing key/values for finer grained conditional
-queries. Only a subset of metadata fields are supported. Available
-fields depend on the value of <cite>dataset</cite>, and maybe be found by
-submitting a dataset_fields query.</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>response</strong> – json response from the search that matches the parameters given</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Max_results:</th><td class="field-body"><p class="first">Maximum results returned by the server</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name" colspan="2">Starting_number:</th></tr>
-<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first">Starting offset for results of a query.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Sort_order:</th><td class="field-body"><p class="first">Order in which results are sorted. Ascending or descending w.r.t the acquisition date.</p>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Extended:</th><td class="field-body"><p class="first">Boolean flag. When true a subsequent query will be sent to the <cite>metadataUrl</cite> returned by
-the first query.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Api_key:</th><td class="field-body"><p class="first last">API key for EROS. Required for searching.</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">json</p>
 </td>
 </tr>
 </tbody>
