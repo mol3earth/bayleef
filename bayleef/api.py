@@ -7,7 +7,7 @@ from requests_futures.sessions import FuturesSession
 
 from bayleef import USGS_API, USGSError
 from bayleef import xsi, payloads
-
+from bayleef.utils import geolocate, master_isvalid
 
 TMPFILE = os.path.join(expanduser("~"), ".usgs")
 NAMESPACES = {
@@ -319,7 +319,6 @@ def search(dataset, node, lat=None, lng=None, distance=100, ll=None, ur=None, st
         data = map(lambda idx: _get_extended(response['data']['results'][idx], results[idx]), range(len(response['data']['results'])))
 
     return response
-
 
 def submit_bulk_order():
     raise NotImplementedError

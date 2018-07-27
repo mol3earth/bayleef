@@ -1,6 +1,7 @@
 import traceback
 from glob import glob
 import pvl
+import os
 
 import geopandas as gpd
 import pandas as pd
@@ -10,6 +11,7 @@ from geoalchemy2.shape import from_shape
 import shapely
 from shapely.geometry import Polygon
 from sqlalchemy import *
+from plio.io.io_gdal import GeoDataset
 
 from bayleef.utils import get_path
 from bayleef.utils import keys_to_lower
@@ -80,9 +82,9 @@ def landsat_8_c1_to_sql(folder, engine):
     # Process Metadata into the database
     for key in metadata.keys():
         # change the ID name
-        metadata[key]['landsat_scene_id'] = pk
-        df = gpd.GeoDataFrame(metadata[key], index=[0])
-
+        submeta = metadata[key]
+        submeta['landsat_scene_id'] = pk
+        df = gpd.GeoDataFrame.from_dict(submeta, orient='index').T
         df.to_sql(key, engine, index=False, schema='landsat_8_c1', if_exists='append')
 
     # Get spatiotemporal data
@@ -119,6 +121,61 @@ def landsat_8_c1_to_sql(folder, engine):
 
 
 
+def master_to_sql(directories, engine):
+    """
+    """
+    metarecs = []
+    imagerecs = []
+
+    if isinstance(directories, str):
+        directories = [directories]
+
+    for directory in directories:
+        ID = os.path.basename(directory)
+        hdfs = os.path.join(directory, '{}.tif'.format(ID))
+        files = glob(os.path.join(directory,'*.tif'))
+        files = sorted(files)
+        filecolumns = ['id', 'time', 'geom', 'original'] + [os.path.basename(os.path.splitext(file)[0]).lower() for file in files]
+
+        try:
+            # open any file to get metadata
+            ds = GeoDataset(directory+'/CalibratedData_Geo.tif')
+            meta = ds.metadata
+            meta['id'] = ID
+
+            # array formatting for postgres
+            meta['scale_factor'] = '{'+meta['scale_factor']+'}'
+
+            for key in meta.keys():
+                val = meta.pop(key)
+                meta[key.lower()] = val
+
+            del ds
+
+            date = datetime.strptime(meta['completiondate'] , "%d-%b-%Y %H:%M:%S")
+
+            ll = float(meta['lon_ll']), float(meta['lat_ll'])
+            lr = float(meta['lon_lr']),float (meta['lon_lr'])
+            ul = float(meta['lon_ul']), float(meta['lon_ul'])
+            ur = float(meta['lon_ur']), float (meta['lon_ur'])
+
+            footprint = WKTElement(Polygon([ll, ul, ur, lr]), srid=4326)
+
+            images_data = [ID, date, footprint, hdfs] + files
+        except Exception as e:
+            print(e)
+            continue
+        metarecs.append(meta)
+        imagerecs.append(images_data)
+
+    metadf = pd.DataFrame(metarecs)
+    imagedf = gpd.GeoDataFrame(imagerecs, columns=filecolumns)
+
+    imagedf.to_sql('images', engine, schema='master', if_exists='append', index=False, dtype={'geom': Geometry('POLYGON', srid=4326)})
+    metadf.to_sql('image_attributes', engine, schema='master', if_exists='append', index=False)
+
+
 func_map = {
-    'LANDSAT_8_C1' : landsat_8_c1_to_sql
+    'LANDSAT_8_C1' : landsat_8_c1_to_sql,
+    'MASTER' : master_to_sql
 }

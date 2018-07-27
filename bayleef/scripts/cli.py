@@ -5,14 +5,21 @@ import logging
 import re
 import wget
 import tarfile
+import gdal
 
 from threading import Thread
 from glob import glob
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 
+from plio.io.io_gdal import GeoDataset
+
+from datetime import datetime
+import errno
+from shutil import copyfile
+
 from bayleef import api
-from bayleef.utils import get_path
+from bayleef.utils import get_path, geolocate, master_isvalid
 from bayleef.sql import func_map
 
 
@@ -326,8 +333,69 @@ def to_sql(db, dataset, root, host, port, user, password):
         try:
             func_map[dataset](dir, engine)
         except Exception as e:
-            logger.error("{}".format(e))
+            logger.error("ERROR: {}".format(e))
+            import traceback
+            traceback.print_exc()
 
+@click.command()
+@click.argument("inroot")
+@click.argument("outroot")
+def load_master(inroot, outroot):
+    """
+    only temporary
+
+    parameters
+    ----------
+    """
+    def master(root, masterhdf):
+        fd = GeoDataset(masterhdf)
+        date = datetime.strptime(fd.metadata['CompletionDate'] , "%d-%b-%Y %H:%M:%S")
+        line = fd.metadata['FlightLineNumber']
+        daytime_flag = fd.metadata['day_night_flag']
+        ID = fd.metadata['producer_granule_id'].split('.')[0]
+
+        path = os.path.join(root, 'MASTER',str(date.year), str(line), daytime_flag,ID)
+        newhdf = os.path.join(path, os.path.basename(masterhdf))
+
+        # Try making the directory
+        try:
+            os.makedirs(path)
+        except OSError as exc:
+            if exc.errno == errno.EEXIST and os.path.isdir(path):
+                pass
+            else:
+                raise
+
+        # copy original hdf
+        try:
+            copyfile(masterhdf, newhdf)
+        except shutil.SameFileError:
+            pass
+
+        # explicitly close file descriptor
+        del fd
+
+        fd = GeoDataset(newhdf)
+        subdatasets = fd.dataset.GetSubDatasets()
+
+        for dataset in subdatasets:
+            ofilename = '{}.vrt'.format(dataset[1].split()[1])
+            ofilename_abspath = os.path.join(path, ofilename)
+            gdal.Translate(ofilename_abspath, dataset[0], format="VRT")
+
+        # create geo corrected calibrated image
+        lats = os.path.join(path, 'PixelLatitude.vrt')
+        lons = os.path.join(path, 'PixelLongitude.vrt')
+        image = os.path.join(path, 'CalibratedData.vrt')
+        geocorrected_image = os.path.join(path, 'CalibratedData_Geo.tif')
+        geolocate(image, geocorrected_image, lats, lons)
+
+    files = glob(inroot+'/**/*.hdf', recursive=True)
+    total = len(files)
+    logger.info('TOTAL: {}'.format(total))
+    for i, file in enumerate(files):
+        logger.info('{}/{} ({}) - Proccessing {}'.format(i, total, round(i/total, 2), file))
+        master(outroot, file)
 
 bayleef.add_command(to_sql, "to-sql")
 bayleef.add_command(login)
@@ -340,3 +408,4 @@ bayleef.add_command(download_options, "download-options")
 bayleef.add_command(download_url, "download-url")
 bayleef.add_command(batch_download, "batch-download")
 bayleef.add_command(batch_download, "download")
+bayleef.add_command(load_master, "load-master")
