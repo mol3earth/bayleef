@@ -3,7 +3,7 @@
 
 Interface to REST services for planetary imagery with the goal of affording the transfer of mission data into an openly available and homogeneous data store.
 
-Documentation is available at: https://kelvinrr.github.io/bayleef/
+Documentation is available at: https://usgs-astrogeology.github.io/bayleef/
 
 ## CLI Overview
 
