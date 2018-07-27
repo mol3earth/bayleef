@@ -16,7 +16,6 @@ NAMESPACES = {
 
 
 def _get_api_key(api_key):
-
     if os.path.exists(TMPFILE):
         with open(TMPFILE, "r") as f:
             api_key = f.read()
@@ -39,10 +38,15 @@ def _get_extended(scene, resp):
     """
     Parse metadata returned from the metadataUrl of a USGS scene.
 
-    :param scene:
+    Parameters
+    ----------
+    scene : dict
         Dictionary representation of a USGS scene
-    :param resp:
+    resp :
         Response object from requests/grequests
+    Returns
+    -------
+    scene :
     """
     root = ElementTree.fromstring(resp.text)
     items = root.findall("eemetadata:metadataFields/eemetadata:metadataField", NAMESPACES)
@@ -56,8 +60,14 @@ def _async_requests(urls):
     Sends multiple non-blocking requests. Returns
     a list of responses.
 
-    :param urls:
+    Parameters
+    ----------
+    urls : list
         List of urls
+    Returns
+    -------
+    responses : list
+        list of responses
     """
     session = FuturesSession(max_workers=30)
     futures = [
@@ -121,6 +131,20 @@ def download(dataset, node, entityids, product='STANDARD', api_key=None):
     Additionally, the response has no indiction which URL is associated
     with which scene/entity id. The URL can be parsed, but the structure
     varies depending on the product.
+
+    Parameters
+    ----------
+    dataset : str
+        The specific collection to download from (e.g. LANDSAT_8_C1 for landsat 8 collection 1), see docs for a list of available datasets
+    node : str
+        Name of the catalog to search in (e.g. cwic for CWIC/LSI Explorer, ee for Earth Explorer, ect.), see docs for a list of available nodes
+    entityids :
+    product : str, optional
+
+    Returns
+    -------
+    response : json
+        json
     """
 
     api_key = _get_api_key(api_key)
@@ -139,7 +163,20 @@ def download(dataset, node, entityids, product='STANDARD', api_key=None):
 
 
 def download_options(dataset, node, entityids, api_key=None):
+    """
+    Parameters
+    ----------
+    dataset : str
+        The specific collection to download from (e.g. LANDSAT_8_C1 for landsat 8 collection 1), see docs for a list of available datasets
+    node : str
+        Name of the catalog to search in (e.g. cwic for CWIC/LSI Explorer, ee for Earth Explorer, ect.), see docs for a list of available nodes
+    entityids :
 
+    Returns
+    -------
+    response : json
+        json
+    """
     api_key = _get_api_key(api_key)
 
     url = '{}/downloadoptions'.format(USGS_API)
@@ -170,9 +207,23 @@ def hits():
 def item_basket():
     raise NotImplementedError
 
-
 def login(username, password, save=True):
+    """
+    Logs a user in using their username and password for the USGS’s EROS service
 
+    Parameters
+    ----------
+    username : str
+        username for an account with the USGS’s EROS service
+    password : str
+        password for an account with the USGS’s EROS service
+    save : bool, optional
+        whether the credentials of the session should be saved as a temp file
+    Returns
+    -------
+    response : json
+        json with response from server after login request
+    """
     url = '{}/login'.format(USGS_API)
     payload = {
         "jsonRequest": payloads.login(username, password)
@@ -196,7 +247,14 @@ def login(username, password, save=True):
 
 
 def logout(api_key=None):
+    """
+    Logs out a user and removes credentials from session.
 
+    Returns
+    -------
+    response : json
+        json with response from server after logout request
+    """
     api_key = _get_api_key(api_key)
 
     url = '{}/logout'.format(USGS_API)
@@ -218,12 +276,19 @@ def metadata(dataset, node, entityids, extended=False, api_key=None):
     """
     Request metadata for a given scene in a USGS dataset.
 
-    :param dataset:
-    :param node:
-    :param entityids:
-    :param extended:
+    Parameters
+    ----------
+    dataset : str
+        The specific collection to download from (e.g. LANDSAT_8_C1 for landsat 8 collection 1), see docs for a list of available datasets
+    node : str
+        Name of the catalog to search in (e.g. cwic for CWIC/LSI Explorer, ee for Earth Explorer, ect.), see docs for a list of available nodes
+    entityids :
+    extended : bool, optional
         Send a second request to the metadata url to get extended metadata on the scene.
-    :param api_key:
+    Returns
+    -------
+    response : json
+        json containing metadata
     """
     api_key = _get_api_key(api_key)
 
@@ -255,43 +320,48 @@ def remove_order_scene():
 def search(dataset, node, lat=None, lng=None, distance=100, ll=None, ur=None, start_date=None, end_date=None,
            where=None, max_results=50000, starting_number=1, sort_order="DESC", extended=False, api_key=None):
     """
+    Search the database for images that match parameters passed.
 
-    :param dataset:
+    Parameters
+    ----------
+    dataset : str
         USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)
-    :param node:
+    node : str
         USGS node representing a dataset catalog (e.g. CWIC, EE, HDDS, LPVS)
-    :param lat:
+    lat : double, optional
         Latitude
-    :param lng:
+    lng : double, optional
         Longitude
-    :param distance:
+    distance : int, optional
         Distance in meters used to for a radial search
-    :param ll:
+    ll : dict, optional
         Dictionary of longitude/latitude coordinates for the lower left corner
         of a bounding box search. e.g. { "longitude": 0.0, "latitude": 0.0 }
-    :param ur:
+    ur : dict, optional
         Dictionary of longitude/latitude coordinates for the upper right corner
         of a bounding box search. e.g. { "longitude": 0.0, "latitude": 0.0 }
-    :param start_date:
-        Start date for when a scene has been acquired
-    :param end_date:
-        End date for when a scene has been acquired
-    :where:
+    start_date : str, optional
+        Start date for when a scene has been acquired. In the format of yyyy-mm-dd
+    end_date : str, optional
+        End date for when a scene has been acquired. In the format of yyyy-mm-dd
+    where : dict, optional
         Dictionary representing key/values for finer grained conditional
         queries. Only a subset of metadata fields are supported. Available
         fields depend on the value of `dataset`, and maybe be found by
         submitting a dataset_fields query.
-    :max_results:
+    max_results : int, optional
         Maximum results returned by the server
-    :starting_number:
+    starting_number : int, optional
         Starting offset for results of a query.
-    :sort_order:
-        Order in which results are sorted. Ascending or descending w.r.t the acquisition date.
-    :extended:
+    sort_order : str, optional
+        Order in which results are sorted. Ascending ("ASC") or descending("DESC") with reference to the acquisition date.
+    extended : bool, optional
         Boolean flag. When true a subsequent query will be sent to the `metadataUrl` returned by
         the first query.
-    :api_key:
-        API key for EROS. Required for searching.
+    Returns
+    -------
+    response : json
+        json response from the search that matches the parameters given
     """
     api_key = _get_api_key(api_key)
 
