@@ -324,11 +324,11 @@ Allows for batch downloading from a particular dataset from the provided `baylea
 .. code-block:: bash
 
    # Pipe the output of the search into batch-download, this will download the results
-   bayleef search [dataset] --start-date [start date] --end-date [end date] --longitude [lng] --latitude [lat] --node [node] | bayleef batch-download [root] [node] [response] |
+   bayleef search [dataset] --start-date [start date] --end-date [end date] --longitude [lng] --latitude [lat] --node [node] | bayleef batch-download [root] [response] |
 
    # An alternative approach, write search results to a file
    bayleef search [dataset] --start-date [start date] --end-date [end date] --longitude [lng] --latitude [lat] --node [node] > resp.json
-   cat resp.json | bayleef batch-download [root] [node] [response]
+   cat resp.json | bayleef batch-download [root] [response]
 
 Download Options
 ----------------
@@ -344,6 +344,14 @@ Download URL
 
     bayleef download-url [dataset] [entity/scene id] --node [node] --product [product]
 
+Upload
+------
+
+Once the files are downloaded into a homogenous structured format using batch-download, they need to be uploaded into a PostGIS database for querying and processing. All tables are stored into schemas matching the dataset name.
+
+.. code-block:: bash
+
+    bayleef to-sql --host [HOST] --port [PORT] --user [USER] --password [PASS] [DATASET] [ROOT] [DB]
 
 Functions
 ---------
