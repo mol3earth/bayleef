@@ -172,7 +172,7 @@
 
 <div class="viewcode-block" id="get_node"><a class="viewcode-back" href="../../../reference/cli.html#bayleef.scripts.cli.get_node">[docs]</a><span class="k">def</span> <span class="nf">get_node</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    .. todo:: Move to more appropriate place in module.</span>
+<span class="sd">    Helper function to get a node corresponding to a dataset</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -333,7 +333,9 @@
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--extended&quot;</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Probe for more metadata.&quot;</span><span class="p">)</span>
 <span class="nd">@api_key_opt</span>
 <span class="k">def</span> <span class="nf">search</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">aoi</span><span class="p">,</span> <span class="n">start_date</span><span class="p">,</span> <span class="n">end_date</span><span class="p">,</span> <span class="n">lng</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">dist</span><span class="p">,</span> <span class="n">lower_left</span><span class="p">,</span> <span class="n">upper_right</span><span class="p">,</span> <span class="n">where</span><span class="p">,</span> <span class="n">geojson</span><span class="p">,</span> <span class="n">extended</span><span class="p">,</span> <span class="n">api_key</span><span class="p">):</span>
-
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Search the database for images that match parameters passed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">node</span> <span class="o">=</span> <span class="n">get_node</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">aoi</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
@@ -455,6 +457,9 @@
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--user&quot;</span><span class="p">)</span>
 <span class="nd">@click</span><span class="o">.</span><span class="n">option</span><span class="p">(</span><span class="s2">&quot;--password&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">to_sql</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    try</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">func_map</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> is not a valid dataset&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dataset</span><span class="p">))</span>
 
