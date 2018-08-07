@@ -14,7 +14,6 @@ import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from IPython.display import HTML
 from matplotlib import rcParams
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from pylab import rcParams
@@ -302,7 +301,7 @@ def get_originaldata(directory):
 
     columns = ['id'] + [path.splitext(path.basename(f))[0] for f in files]
     data = [indices['id']] + files
-    return dict(sorted(zip(columns, data))
+    return dict(sorted(zip(columns, data)))
 
 
 def serial_upload(dataset, files, engine, chunksize=10000, unique_only=True, srid=4326):
@@ -353,23 +352,24 @@ def serial_upload(dataset, files, engine, chunksize=10000, unique_only=True, sri
             imagedata = pd.DataFrame.from_dict([get_imagedata(file) for file in chunk])
             ogdata = pd.DataFrame.from_dict([get_originaldata(file) for file in chunk])
 
-            # create the table using pandas to generate the schema, this avoid
+            # create the table using pandas to generate the schema, this avoids
             # some convoluded sqlalchemy code, although is this any better?
             indices_table = pd.io.sql.SQLTable('indices', pd_engine, frame=indices, schema=dataset, index=False, if_exists='append',dtype={'geom': Geometry('POLYGON')})
             meta_table = pd.io.sql.SQLTable('meta', pd_engine, frame=meta, schema=dataset, index=False, if_exists='append',dtype={'meta':JSONB})
             imagedata_table = pd.io.sql.SQLTable('imagedata', pd_engine, frame=imagedata, schema=dataset, index=False, if_exists='append')
             ogdata_table = pd.io.sql.SQLTable('original', pd_engine, frame=ogdata, schema=dataset, index=False, if_exists='append')
 
-            indices_dups = indices.isin({'id' : current_ids_in_db})['id']
-            meta_dups = meta.isin({'id' : current_ids_in_db})['id']
-            imagedata_dups = imagedata.isin({'id' : current_ids_in_db})['id']
-            ogdata_dups = ogdata.isin({'id' : current_ids_in_db})['id']
+            if unique_only:
+                indices_dups = indices.isin({'id' : current_ids_in_db})['id']
+                meta_dups = meta.isin({'id' : current_ids_in_db})['id']
+                imagedata_dups = imagedata.isin({'id' : current_ids_in_db})['id']
+                ogdata_dups = ogdata.isin({'id' : current_ids_in_db})['id']
 
-            # remove dups before upload
-            indices = indices[~indices_dups]
-            meta = meta[~meta_dups]
-            imagedata = imagedata[~imagedata_dups]
-            ogdata = ogdata[~ogdata_dups]
+                # remove dups before upload
+                indices = indices[~indices_dups]
+                meta = meta[~meta_dups]
+                imagedata = imagedata[~imagedata_dups]
+                ogdata = ogdata[~ogdata_dups]
 
             if all([indices.empty, meta.empty, imagedata.empty, ogdata.empty]):
                 raise Exception('All Tables are empty')
@@ -382,7 +382,6 @@ def serial_upload(dataset, files, engine, chunksize=10000, unique_only=True, sri
                 cursor.execute(imagedata_table.sql_schema())
             if not ogdata_table.exists():
                 cursor.execute(ogdata_table.sql_schema())
-
 
             indices = indices.to_csv(None, sep='\t', quotechar="'", header=False, index=False)
             meta = meta.to_csv(None, sep='\t', quotechar="'", header=False, index=False)

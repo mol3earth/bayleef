@@ -1,41 +1,49 @@
-import json
-from os import path
-
-import bayleef
-import geopandas as gpd
-
-import plio
-from plio.io.io_gdal import GeoDataset
-import matplotlib.pyplot as plt
-from matplotlib import rcParams
-import matplotlib.animation as animation
-from pylab import rcParams
-import numpy as np
-import gdal
-from os import path
-import os
-import math
-import osr
-import hashlib
-import pvl
-from glob import glob
-import geopandas as gpd
-import pandas as pd
-from datetime import date
-from geoalchemy2 import Geometry, WKTElement
-from geoalchemy2.shape import from_shape
-import shapely
-from shapely.geometry import Polygon
-from sqlalchemy import *
-import re
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-from IPython.display import HTML
 import errno
+import hashlib
+import json
+import math
+import os
+import re
+from datetime import date, datetime
+from glob import glob
+from os import path
 from shutil import copyfile
 
-from datetime import datetime
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from matplotlib import rcParams
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from pylab import rcParams
+from sqlalchemy import *
+
+import bayleef
+import gdal
+import geopandas as gpd
+import osr
+import plio
+import pvl
+import shapely
+from geoalchemy2 import Geometry, WKTElement
+from geoalchemy2.shape import from_shape
+from plio.io.io_gdal import GeoDataset
+from shapely.geometry import Polygon
+
 
 def master(root, masterhdf):
+    """
+    Ingestion function for master. Master is unique in that it cannot be pulled
+    by an API, therefore original MASTER files have to exist locally.
+
+    Parameters
+    ----------
+    root : str
+           path to the bayleef data directory.
+
+    masterhdf : str
+                path to a MASTER .HDF file
+    """
     fd = GeoDataset(masterhdf)
     meta = fd.metadata
 
@@ -117,4 +125,3 @@ def master(root, masterhdf):
     meta_json_file = path.join(basepath,'meta.json')
     json.dump(index_meta, open(index_json_file, 'w+'))
     json.dump(meta, open(meta_json_file, 'w+'))
-    

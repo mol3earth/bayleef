@@ -1,27 +1,29 @@
-import sys
-import os, json
-import click
+import errno
+import json
 import logging
+import os
 import re
-import wget
+import sys
 import tarfile
-import gdal
-
-from threading import Thread
+from datetime import datetime
 from glob import glob
+from shutil import copyfile
+from threading import Thread
+
+import click
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 
+import gdal
+import wget
+from bayleef import api
+from bayleef.sql import func_map
+from bayleef.utils import geolocate, get_path, master_isvalid
 from plio.io.io_gdal import GeoDataset
 
-from datetime import datetime
-import errno
-from shutil import copyfile
+from pysbatch import *
 
-from bayleef import api
-from bayleef.utils import get_path, geolocate, master_isvalid
-from bayleef.sql import func_map
-
+from .. import ingest
 
 LOG_FORMAT = '%(asctime)-15s ->> %(message)s'
 logging.basicConfig(format=LOG_FORMAT)
@@ -121,9 +123,12 @@ def bayleef():
 
 
 @click.command()
-@click.argument("username", envvar='USGS_USERNAME', help="username for an account with the USGS’s EROS service")
-@click.argument("password", envvar='USGS_PASSWORD', help="password for an account with the USGS’s EROS service")
+@click.argument("username", envvar='USGS_USERNAME')
+@click.argument("password", envvar='USGS_PASSWORD')
 def login(username, password):
+    """
+    Login to the USGS EROs service.
+    """
     api_key = api.login(username, password)
     click.echo(api_key)
 
@@ -134,7 +139,7 @@ def logout():
 
 
 @click.command()
-@click.argument("node", help="Name of the catalog to search in (e.g. cwic for CWIC/LSI Explorer, ee for Earth Explorer, ect.), see docs for a list of available nodes")
+@click.argument("node")
 @click.option("--start-date", help="Start date for when a scene has been acquired. In the format of yyyy-mm-dd")
 @click.option("--end-date", help="End date for when a scene has been acquired. In the format of yyyy-mm-dd")
 def datasets(node, start_date, end_date):
@@ -143,7 +148,7 @@ def datasets(node, start_date, end_date):
 
 
 @click.command()
-@click.argument("dataset", help="USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)")
+@click.argument("dataset")
 @click.argument("scene-ids", nargs=-1)
 @node_opt
 @click.option("--extended", is_flag=True, help="Probe for more metadata.")
@@ -151,7 +156,7 @@ def datasets(node, start_date, end_date):
 @api_key_opt
 def metadata(dataset, scene_ids, node, extended, geojson, api_key):
     """
-    Request metadata for a given scene in a USGS dataset.
+    Request metadata.
     """
     if len(scene_ids) == 0:
         scene_ids = map(lambda s: s.strip(), click.open_file('-').readlines())
@@ -175,7 +180,7 @@ def dataset_fields(dataset, node):
 
 
 @click.command()
-@click.argument("dataset", help="USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)")
+@click.argument("dataset")
 @node_opt
 @click.argument("aoi", default="-", required=False)
 @click.option("--start-date", help="Start date for when a scene has been acquired. In the format of yyyy-mm-dd")
@@ -191,7 +196,7 @@ def dataset_fields(dataset, node):
 @api_key_opt
 def search(dataset, node, aoi, start_date, end_date, lng, lat, dist, lower_left, upper_right, where, geojson, extended, api_key):
     """
-    Search the database for images that match parameters passed.
+    Search for images.
     """
     node = get_node(dataset, node)
 
@@ -232,7 +237,7 @@ def search(dataset, node, aoi, start_date, end_date, lng, lat, dist, lower_left,
 
 
 @click.command()
-@click.argument("dataset", help="USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)")
+@click.argument("dataset")
 @click.argument("scene-ids", nargs=-1)
 @node_opt
 @api_key_opt
@@ -244,7 +249,7 @@ def download_options(dataset, scene_ids, node, api_key):
 
 
 @click.command()
-@click.argument("dataset", help="USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)")
+@click.argument("dataset")
 @click.argument("scene_ids", nargs=-1)
 @click.option("--product", nargs=1, required=True)
 @node_opt
@@ -257,11 +262,11 @@ def download_url(dataset, scene_ids, product, node, api_key):
 
 
 @click.command()
-@click.argument("root", help="data directory to store downloads in")
+@click.argument("root")
 @node_opt
 def batch_download(root, node):
     """
-    Used with the search function to download the results returned from search
+    Download from search result.
     """
     def download_from_result(scene, root):
         scene_id = scene['entityId']
@@ -297,21 +302,24 @@ def batch_download(root, node):
 
     # convert string into dict
     resp = json.loads(resp)
-    logger.info("Number of files: {}".format(resp['data']['numberReturned']))
+    nfiles = resp['data']['numberReturned']
+    logger.info("Number of files: {}".format(nfiles))
     results = resp['data']['results']
 
-    for result in results:
+    for i, result in enumerate(results):
         # Run Downloads as threads so they keyboard interupts are
-        # deferred until download is complaete
+        # deferred until download is complete
+
+        logger.info('{}/{}'.format(i, nfiles))
         job = Thread(target=download_from_result, args=(result, root))
         job.start()
         job.join()
 
 
 @click.command()
-@click.argument("dataset", help="USGS dataset (e.g. EO1_HYP_PUB, LANDSAT_8)")
-@click.argument("root", help="data directory to store downloads in")
-@click.argument("db", help="name of database to upload to")
+@click.argument("dataset")
+@click.argument("root")
+@click.argument("db")
 @click.option("--host", default="localhost", help="host id")
 @click.option("--port", default="5432", help="port number")
 @click.option("--user", help="username for database")
@@ -344,65 +352,58 @@ def to_sql(db, dataset, root, host, port, user, password):
             import traceback
             traceback.print_exc()
 
-@click.command()
-@click.argument("inroot")
-@click.argument("outroot")
-def load_master(inroot, outroot):
+@click.command(context_settings=dict(
+    ignore_unknown_options=True,
+    allow_extra_args=True,
+))
+@click.argument("input", required=True)
+@click.argument("bayleef_data", required=True)
+@click.argument('sbatch-options', nargs=-1)
+def batch_proccess(input, bayleef_data, sbatch_options, **kwargs):
     """
-    only temporary
+    """
+    files = glob(input+'/**/*.hdf', recursive=True)
+
+    sbatch_settings = batch_setting_new("--cpus-per-task=1 --mem=4000 --job-name=lalala")
+
+    if sbatch_options:
+        print(sbatch_options)
+        sbatch_settings.add_options(' '.join(sbatch_options))
+    print(sbatch_options)
+    print(sbatch_settings)
+    sbatch_settings.sbatch('echo HELLO')
+
+
+@click.command()
+@click.argument("input", required=True)
+@click.argument("bayleef_data", required=True)
+@click.option("-r", default=False, help="Set to recursively glob .HDF files (Warning: Every .HDF file under the directory will be treated as a Master file)")
+def load_master(input, bayleef_data, r):
+    """
+    Load master data.
 
     parameters
     ----------
+
+    in : str
+         root directory containing master files, .HDFs are recursively globbed.
+
+    bayleef_data : str
+                   root of the bayleef data directory
     """
-    def master(root, masterhdf):
-        fd = GeoDataset(masterhdf)
-        date = datetime.strptime(fd.metadata['CompletionDate'] , "%d-%b-%Y %H:%M:%S")
-        line = fd.metadata['FlightLineNumber']
-        daytime_flag = fd.metadata['day_night_flag']
-        ID = fd.metadata['producer_granule_id'].split('.')[0]
 
-        path = os.path.join(root, 'MASTER',str(date.year), str(line), daytime_flag,ID)
-        newhdf = os.path.join(path, os.path.basename(masterhdf))
+    files = input
+    if not r: # if not recursive
+        files = [input]
+    else:
+        files = glob(input+'/**/*.hdf', recursive=True)
 
-        # Try making the directory
-        try:
-            os.makedirs(path)
-        except OSError as exc:
-            if exc.errno == errno.EEXIST and os.path.isdir(path):
-                pass
-            else:
-                raise
-
-        # copy original hdf
-        try:
-            copyfile(masterhdf, newhdf)
-        except shutil.SameFileError:
-            pass
-
-        # explicitly close file descriptor
-        del fd
-
-        fd = GeoDataset(newhdf)
-        subdatasets = fd.dataset.GetSubDatasets()
-
-        for dataset in subdatasets:
-            ofilename = '{}.vrt'.format(dataset[1].split()[1])
-            ofilename_abspath = os.path.join(path, ofilename)
-            gdal.Translate(ofilename_abspath, dataset[0], format="VRT")
-
-        # create geo corrected calibrated image
-        lats = os.path.join(path, 'PixelLatitude.vrt')
-        lons = os.path.join(path, 'PixelLongitude.vrt')
-        image = os.path.join(path, 'CalibratedData.vrt')
-        geocorrected_image = os.path.join(path, 'CalibratedData_Geo.tif')
-        geolocate(image, geocorrected_image, lats, lons)
-
-    files = glob(inroot+'/**/*.hdf', recursive=True)
     total = len(files)
-    logger.info('TOTAL: {}'.format(total))
+
+    logger.info("{} Folders found".format(total))
     for i, file in enumerate(files):
         logger.info('{}/{} ({}) - Proccessing {}'.format(i, total, round(i/total, 2), file))
-        master(outroot, file)
+        ingest.master(bayleef_data, file)
 
 bayleef.add_command(to_sql, "to-sql")
 bayleef.add_command(login)
@@ -413,6 +414,6 @@ bayleef.add_command(metadata)
 bayleef.add_command(search)
 bayleef.add_command(download_options, "download-options")
 bayleef.add_command(download_url, "download-url")
-bayleef.add_command(batch_download, "batch-download")
 bayleef.add_command(batch_download, "download")
 bayleef.add_command(load_master, "load-master")
+bayleef.add_command(batch_proccess, "batch-proccess")
