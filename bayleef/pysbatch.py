@@ -34,13 +34,12 @@ def run_cmd(cmd):
 
 def limit_jobs(limit=20000):
     l_jobs=run_cmd(['squeue', '-u', os.environ['USER'], '-t', 'running']).split("\n")
-    # limit the total number of jobs in slurm job queue 
+    # limit the total number of jobs in slurm job queue
     while len(l_jobs) >= limit:
         time.sleep(1000)
 
 def limit_queue(limit=20000):
-    l_jobs=run_cmd(['squeue', '-u', os.environ['USER']).split("\n")
-    # limit the total number of jobs in slurm job queue 
+    l_jobs=run_cmd(['squeue', '-u', os.environ['USER']]).split("\n")
+    # limit the total number of jobs in slurm job queue
     while len(l_jobs) >= limit:
         time.sleep(1000)
-
