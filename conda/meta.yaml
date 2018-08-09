@@ -1,6 +1,6 @@
 package:
   name: bayleef
-  version: 0.2.1
+  version: 0.2.2
 
 channels:
   - conda-forge
@@ -8,7 +8,7 @@ channels:
   - usgs-astrogeology
 
 source:
-   git_url: https://github.com/USGS-Astrogeology/bayleef.git
+   path: ..
 
 requirements:
   build:

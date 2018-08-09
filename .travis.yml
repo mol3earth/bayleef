@@ -1,4 +1,5 @@
 language: python
+sudo: false
 
 env:
   - PYTHON_VERSION=3.5
@@ -20,8 +21,14 @@ before_install:
   - conda env create --file environment.yml -n bayleef
   - source activate bayleef
   - conda install pytest
-  - conda install mock 
+  - conda install mock
 script:
   - pytest .
 
-sudo: false
+after_success:
+  - coveralls
+  # Need to do the build in the root
+  - source deactivate
+  - conda install conda-build anaconda-client
+  - conda config --set anaconda_upload yes
+  - conda build --token $CONDA_UPLOAD_TOKEN --python $PYTHON_VERSION -c conda-forge -c menpo -c usgs-astrogeology conda
