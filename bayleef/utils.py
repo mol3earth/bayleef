@@ -8,6 +8,36 @@ from datetime import datetime
 from plio.io.io_gdal import GeoDataset
 
 
+
+def geolocate(infile, outfile, lats, lons, dstSRS="EPSG:4326", format="GTiff", woptions={}, toptions={}):
+    """
+    """
+    gdal.Translate('/vsimem/lats.vrt',lats, format="VRT", outputSRS=format, options=gdal.TranslateOptions(**toptions))
+    gdal.Translate('/vsimem/lons.vrt',lons, format="VRT", outputSRS=format, options=gdal.TranslateOptions(**toptions))
+
+    #Probably not neccessary
+    gdal.Translate('/vsimem/image.vrt', infile, format="VRT", outputSRS=format, bandList=[48], options=gdal.TranslateOptions(**toptions))
+
+    image = gdal.Open('/vsimem/image.vrt', gdal.GA_Update)
+    geoloc= {
+        'X_DATASET' : '/vsimem/lons.vrt',
+        'X_BAND' : '1',
+        'Y_DATASET' : '/vsimem/lats.vrt',
+        'Y_BAND' : '1',
+        'PIXEL_OFFSET' : '0',
+        'LINE_OFFSET' : '0',
+        'PIXEL_STEP' : '1',
+        'LINE_STEP' : '1'
+    }
+
+    image.SetMetadata(geoloc, 'GEOLOCATION')
+    # explicity close image
+    del image
+
+    gdal.Warp(outfile, '/vsimem/image.vrt', format=format, dstSRS=dstSRS, geoloc=True)
+    return GeoDataset(outfile)
+
+
 def get_path(response, root, dataset):
     """
     """
