@@ -30,6 +30,8 @@ from geoalchemy2.shape import from_shape
 from plio.io.io_gdal import GeoDataset
 from shapely.geometry import Polygon
 
+from . import utils
+
 
 def master(root, masterhdf):
     """
@@ -98,7 +100,7 @@ def master(root, masterhdf):
     image = path.join(imagedatapath, 'CalibratedData.tif')
 
     geocorrected_image = path.join(imagedatapath, 'CalibratedData_Geo.tif')
-    geolocate(image, geocorrected_image, lats, lons)
+    utils.geolocate(image, geocorrected_image, lats, lons)
 
 
     # Master has 50 bands, extract them as seperate files

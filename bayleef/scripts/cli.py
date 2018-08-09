@@ -10,20 +10,22 @@ from glob import glob
 from shutil import copyfile
 from threading import Thread
 
+import re
+import fnmatch
 import click
 from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 
 import gdal
 import wget
-from bayleef import api
-from bayleef.sql import func_map
-from bayleef.utils import geolocate, get_path, master_isvalid
 from plio.io.io_gdal import GeoDataset
 
 from pysbatch import *
 
+from .. import api
 from .. import ingest
+from .. import utils
+from .. import sql
 
 LOG_FORMAT = '%(asctime)-15s ->> %(message)s'
 logging.basicConfig(format=LOG_FORMAT)
@@ -275,7 +277,7 @@ def batch_download(root, node):
         dataset = re.findall(r'dataset_name=[A-Z0-9_]*', scene['orderUrl'])[0]
         dataset = dataset.split('=')[1]
 
-        path = get_path(scene, root, dataset)
+        path = utils.get_path(scene, root, dataset)
         if os.path.exists(path):
             logger.warning('{} already in cache, skipping'.format(path))
             return
@@ -328,7 +330,7 @@ def to_sql(db, dataset, root, host, port, user, password):
     """
     Upload the dataset to a database
     """
-    if not dataset in func_map.keys():
+    if not dataset in sql.func_map.keys():
         logger.error("{} is not a valid dataset".format(dataset))
 
     dataset_root = os.path.join(root, dataset)
@@ -358,21 +360,36 @@ def to_sql(db, dataset, root, host, port, user, password):
 ))
 @click.argument("input", required=True)
 @click.argument("bayleef_data", required=True)
-@click.argument('sbatch-options', nargs=-1)
-def batch_proccess(input, bayleef_data, sbatch_options, **kwargs):
+@click.option("--add-option", "-ao", default='', help="Text containing misc. sbatch parameters")
+@click.option("--log", "-l", default=None, help="Log output directory, default is redirected to /dev/null")
+@click.option("--cpus", "-c", default=1, help="CPUs per job. Default = 1")
+@click.option("--mem", '-m', default=4, help="Memory per job in gigabytes. Default = 4")
+@click.option("--time", "-t", default='01:00:00', help="Max time per job, default = one hour.")
+@click.option("--njobs", "-n", default='-1', help="Max number of conccurent jobs, -1 for unlimited. Default = -1")
+def sbatch_master(input, bayleef_data, add_option, njobs, **options):
     """
+    Run load-master command as sbatch jobs. Strongly reccomended that this is run directly on
+    the slurm master.
     """
-    files = glob(input+'/**/*.hdf', recursive=True)
 
-    sbatch_settings = batch_setting_new("--cpus-per-task=1 --mem=4000 --job-name=lalala")
+    if not os.path.exists(options['log']):
+        raise Exception('Log directory {} is not a directory or does not exist'.format(options['log']))
 
-    if sbatch_options:
-        print(sbatch_options)
-        sbatch_settings.add_options(' '.join(sbatch_options))
-    print(sbatch_options)
-    print(sbatch_settings)
-    sbatch_settings.sbatch('echo HELLO')
+    if not os.path.exists(bayleef_data):
+        raise Exception('Bayleef data directory {} is not a directory or does not exist'.format(bayleef_data))
 
+    glob_pattern = re.compile(fnmatch.translate(input+'/**/*.hdf'), re.IGNORECASE).pattern
+    files = glob(glob_pattern, recursive=True)
+
+    logger.info("sbatch options: log={log} cpus={cpus} mem={mem} time={time} njobs={njobs}".format(**options, njobs=njobs))
+    logger.info("other options: {}".format(add_option if add_option else None))
+
+    for file in files:
+        command = "bayleef load-master {} {}".format(file, bayleef_data)
+        logger.info("Dispatching 'bayleef load-master {} {}'".format(input, bayleef_data))
+        out = sbatch(wrap='which python', **options)
+        logger.info(out)
+        limit_jobs(limit=njobs)
 
 @click.command()
 @click.argument("input", required=True)
@@ -396,11 +413,12 @@ def load_master(input, bayleef_data, r):
     if not r: # if not recursive
         files = [input]
     else:
-        files = glob(input+'/**/*.hdf', recursive=True)
+        glob_pattern = re.compile(fnmatch.translate(input+'/**/*.hdf'), re.IGNORECASE).pattern
+        files = glob(glob_pattern, recursive=True)
 
     total = len(files)
 
-    logger.info("{} Folders found".format(total))
+    logger.info("{} Files Found".format(total))
     for i, file in enumerate(files):
         logger.info('{}/{} ({}) - Proccessing {}'.format(i, total, round(i/total, 2), file))
         ingest.master(bayleef_data, file)
@@ -416,4 +434,4 @@ bayleef.add_command(download_options, "download-options")
 bayleef.add_command(download_url, "download-url")
 bayleef.add_command(batch_download, "download")
 bayleef.add_command(load_master, "load-master")
-bayleef.add_command(batch_proccess, "batch-proccess")
+bayleef.add_command(sbatch_master, "sbatch-master")
