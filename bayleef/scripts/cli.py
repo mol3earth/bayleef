@@ -26,6 +26,7 @@ from .. import api
 from .. import ingest
 from .. import utils
 from .. import sql
+from .. import pysbatch
 
 LOG_FORMAT = '%(asctime)-15s ->> %(message)s'
 logging.basicConfig(format=LOG_FORMAT)
@@ -361,11 +362,10 @@ def to_sql(db, dataset, root, host, port, user, password):
 @click.argument("input", required=True)
 @click.argument("bayleef_data", required=True)
 @click.option("--add-option", "-ao", default='', help="Text containing misc. sbatch parameters")
-@click.option("--log", "-l", default=None, help="Log output directory, default is redirected to /dev/null")
-@click.option("--cpus", "-c", default=1, help="CPUs per job. Default = 1")
-@click.option("--mem", '-m', default=4, help="Memory per job in gigabytes. Default = 4")
+@click.option("--log", "-l", default='.', help="Log output directory, default is redirected to /dev/null")
+@click.option("--mem", '-m', default='4', help="Memory per job in gigabytes. Default = 4")
 @click.option("--time", "-t", default='01:00:00', help="Max time per job, default = one hour.")
-@click.option("--njobs", "-n", default='-1', help="Max number of conccurent jobs, -1 for unlimited. Default = -1")
+@click.option("--njobs", "-n", default=-1, help="Max number of conccurent jobs, -1 for unlimited. Default = -1")
 def sbatch_master(input, bayleef_data, add_option, njobs, **options):
     """
     Run load-master command as sbatch jobs. Strongly reccomended that this is run directly on
@@ -378,23 +378,31 @@ def sbatch_master(input, bayleef_data, add_option, njobs, **options):
     if not os.path.exists(bayleef_data):
         raise Exception('Bayleef data directory {} is not a directory or does not exist'.format(bayleef_data))
 
-    glob_pattern = re.compile(fnmatch.translate(input+'/**/*.hdf'), re.IGNORECASE).pattern
-    files = glob(glob_pattern, recursive=True)
+    files = glob(input+'/**/*.hdf', recursive=True)
 
-    logger.info("sbatch options: log={log} cpus={cpus} mem={mem} time={time} njobs={njobs}".format(**options, njobs=njobs))
+    logger.info("sbatch options: log={log} mem={mem} time={time} njobs={njobs}".format(**options, njobs=njobs))
     logger.info("other options: {}".format(add_option if add_option else None))
 
-    for file in files:
-        command = "bayleef load-master {} {}".format(file, bayleef_data)
-        logger.info("Dispatching 'bayleef load-master {} {}'".format(input, bayleef_data))
-        out = sbatch(wrap='which python', **options)
+    for i, file in enumerate(files):
+        command = "bayleef load-master '{}' '{}'".format(file, bayleef_data)
+        job_name = 'bayleef_{}_{}'.format(i, os.path.splitext(os.path.basename(file))[0] )
+        log_file = os.path.join(options['log'], job_name+'.log')
+
+        logger.info("{}/{}".format(i, len(files)))
+        logger.info("Dispatching {}".format(command))
+        logger.info('Jobname: {}'.format(job_name))
+        logger.info('Log File: {}'.format(log_file))
+        out = pysbatch.sbatch(wrap=command, mem=options['mem'], log=log_file, time=options['time'], job_name=job_name, add_option=add_option)
         logger.info(out)
-        limit_jobs(limit=njobs)
+
+        if njobs != -1:
+            pysbatch.limit_jobs(njobs)
+
 
 @click.command()
 @click.argument("input", required=True)
 @click.argument("bayleef_data", required=True)
-@click.option("-r", default=False, help="Set to recursively glob .HDF files (Warning: Every .HDF file under the directory will be treated as a Master file)")
+@click.option("-r", is_flag=True, help="Set to recursively glob .HDF files (Warning: Every .HDF file under the directory will be treated as a Master file)")
 def load_master(input, bayleef_data, r):
     """
     Load master data.
@@ -413,8 +421,7 @@ def load_master(input, bayleef_data, r):
     if not r: # if not recursive
         files = [input]
     else:
-        glob_pattern = re.compile(fnmatch.translate(input+'/**/*.hdf'), re.IGNORECASE).pattern
-        files = glob(glob_pattern, recursive=True)
+        files = glob(input+'/**/*.hdf', recursive=True)
 
     total = len(files)
 

@@ -1,13 +1,15 @@
-name: bayleef
 channels:
   - conda-forge
-  - usgs-astrogeology 
+  - usgs-astrogeology
+  - anaconda
+  - defaults
 dependencies:
-  - pvl
-  - sqlalchemy
-  - geopandas
-  - geoalchemy2
-  - pywget
-  - plio
-pip: 
-  - pysbatch
+   - click
+   - requests
+   - geopandas
+   - pvl
+   - sqlalchemy
+   - geoalchemy2
+   - pywget
+   - plio
+   - requests-futures

@@ -18,6 +18,11 @@ requirements:
    - requests
    - geopandas
    - pvl
+   - sqlalchemy
+   - geoalchemy2
+   - pywget
+   - plio
+   - requests-futures
 
   run:
    - mock
@@ -26,5 +31,8 @@ requirements:
    - requests
    - geopandas
    - pvl
-   - pywget
+   - sqlalchemy
    - geoalchemy2
+   - pywget
+   - plio
+   - requests-futures
