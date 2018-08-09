@@ -20,8 +20,6 @@ import gdal
 import wget
 from plio.io.io_gdal import GeoDataset
 
-from pysbatch import *
-
 from .. import api
 from .. import ingest
 from .. import utils
