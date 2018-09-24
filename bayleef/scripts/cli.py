@@ -19,12 +19,15 @@ from sqlalchemy.exc import IntegrityError
 import gdal
 import wget
 from plio.io.io_gdal import GeoDataset
+from pathlib import Path
 
 from .. import api
 from .. import ingest
 from .. import utils
 from .. import sql
 from .. import pysbatch
+from bayleef import config
+from bayleef import config_file
 
 LOG_FORMAT = '%(asctime)-15s ->> %(message)s'
 logging.basicConfig(format=LOG_FORMAT)
@@ -344,14 +347,17 @@ def to_sql(db, dataset, root, host, port, user, password):
 
     # only suppoort postgres for now
     engine = create_engine('postgresql://{}:{}@{}:{}/{}'.format(user,password,host,port,db))
-    for dir in leaf_dirs:
-        logger.info("Uploading {}".format(dir))
-        try:
-            func_map[dataset](dir, engine)
-        except Exception as e:
-            logger.error("ERROR: {}".format(e))
-            import traceback
-            traceback.print_exc()
+    try:
+        sql.serial_upload(dataset, lead_dirs)
+    except:
+        for dir in leaf_dirs:
+            logger.info("Uploading {}".format(dir))
+            try:
+                sql.func_map[dataset](dir, engine)
+            except Exception as e:
+                logger.error("ERROR: {}".format(e))
+                import traceback
+                traceback.print_exc()
 
 @click.command(context_settings=dict(
     ignore_unknown_options=True,
@@ -399,7 +405,7 @@ def sbatch_master(input, bayleef_data, add_option, njobs, **options):
 
 @click.command()
 @click.argument("input", required=True)
-@click.argument("bayleef_data", required=True)
+@click.argument("--bayleef_data", "-d", default=config.data)
 @click.option("-r", is_flag=True, help="Set to recursively glob .HDF files (Warning: Every .HDF file under the directory will be treated as a Master file)")
 def load_master(input, bayleef_data, r):
     """
@@ -428,6 +434,22 @@ def load_master(input, bayleef_data, r):
         logger.info('{}/{} ({}) - Proccessing {}'.format(i, total, round(i/total, 2), file))
         ingest.master(bayleef_data, file)
 
+
+@click.command()
+@click.argument("id1", required=True)
+@click.argument("id2", required=True)
+@click.option("--bayleef_data", "-d", default=config.data)
+def themis_pairs(id1, id2, bayleef_data):
+    from bayleef.ingest import themis_pairs
+    ingest.themis_pairs(bayleef_data, id1, id2)
+
+@click.command()
+def config_call():
+    logger.info("Config file located in: {}".format(config_file))
+    utils.print_dict(config)
+
+bayleef.add_command(config_call, "config")
+bayleef.add_command(themis_pairs, "themis-pairs")
 bayleef.add_command(to_sql, "to-sql")
 bayleef.add_command(login)
 bayleef.add_command(logout)

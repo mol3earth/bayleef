@@ -1,0 +1,34 @@
+2018-09-24 16:50:36,316 ->> Making directories /scratch/krodriguez/bayleef-data/THEMIS_PAIRS/I00888002/I01250003/original and /scratch/krodriguez/bayleef-data/THEMIS_PAIRS/I00888002/I01250003/images
+2018-09-24 16:50:36,319 ->> IDs: I00888002 I01250003
+2018-09-24 16:50:36,319 ->> DATA DIR: /scratch/krodriguez/bayleef-data/
+2018-09-24 16:50:36,320 ->> IMAGE 1 PATH: /scratch/krodriguez/bayleef-data/THEMIS/I/0/I00888002/original/l1.cub
+2018-09-24 16:50:36,320 ->> IMAGE 2 PATH: /scratch/krodriguez/bayleef-data/THEMIS/I/0/I01250003/original/l1.cub
+2018-09-24 16:50:36,320 ->> PAIR OG DIR: /scratch/krodriguez/bayleef-data/THEMIS_PAIRS/I00888002/I01250003/original
+2018-09-24 16:50:36,320 ->> PAIR IMAGE PATH: /scratch/krodriguez/bayleef-data/THEMIS_PAIRS/I00888002/I01250003/images
+2018-09-24 16:50:36,320 ->> PAIR DIR: /scratch/krodriguez/bayleef-data/THEMIS_PAIRS/I00888002/I01250003
+2018-09-24 16:50:36,324 ->> File /scratch/krodriguez/bayleef-data/THEMIS/I/0/I00888002 Exists, skipping redownload.
+2018-09-24 16:50:36,327 ->> File /scratch/krodriguez/bayleef-data/THEMIS/I/0/I01250003 Exists, skipping redownload.
+2018-09-24 16:50:36,591 ->> davinci -f /home/krodriguez/Downloads/davinci/thm_crop_lat.dv from=/scratch/krodriguez/bayleef-data/THEMIS/I/0/I00888002/original/l1.cub to=/scratch/krodriguez/bayleef-data/THEMIS_PAIRS/I00888002/I01250003/original/source.l1.cub minlat=-49.89633714318344 maxlat=-40.19881242283894
+2018-09-24 16:50:41,496 ->> davinci -f /home/krodriguez/Downloads/davinci/thm_crop_lat.dv from=/scratch/krodriguez/bayleef-data/THEMIS/I/0/I01250003/original/l1.cub to=/scratch/krodriguez/bayleef-data/THEMIS_PAIRS/I00888002/I01250003/original/destination.l1.cub minlat=-49.89633714318344 maxlat=-40.19881242283894
+2018-09-24 16:50:46,388 ->> Projecting /scratch/krodriguez/bayleef-data/THEMIS_PAIRS/I00888002/I01250003/original/source.l1.cub to /scratch/krodriguez/bayleef-data/THEMIS_PAIRS/I00888002/I01250003/original/source.l2.cub with map file:
+ PVLModule([
+  ('Mapping',
+   {'CenterLongitude': 0.0,
+    'LatitudeType': 'Planetocentric',
+    'LongitudeDirection': 'PositiveEast',
+    'LongitudeDomain': 180,
+    'ProjectionName': 'Equirectangular',
+    'TargetName': 'Mars'})
+])
+2018-09-24 16:50:46,469 ->> Running cam2map on /scratch/krodriguez/bayleef-data/THEMIS_PAIRS/I00888002/I01250003/original/source.l1.cub
+2018-09-24 16:52:43,696 ->> Projecting /scratch/krodriguez/bayleef-data/THEMIS_PAIRS/I00888002/I01250003/original/destination.l1.cub to /scratch/krodriguez/bayleef-data/THEMIS_PAIRS/I00888002/I01250003/original/destination.l2.cub with map file:
+ PVLModule([
+  ('Mapping',
+   {'CenterLongitude': 0.0,
+    'LatitudeType': 'Planetocentric',
+    'LongitudeDirection': 'PositiveEast',
+    'LongitudeDomain': 180,
+    'ProjectionName': 'Equirectangular',
+    'TargetName': 'Mars'})
+])
+2018-09-24 16:52:43,800 ->> Running cam2map on /scratch/krodriguez/bayleef-data/THEMIS_PAIRS/I00888002/I01250003/original/destination.l1.cub

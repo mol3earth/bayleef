@@ -304,7 +304,7 @@ def get_originaldata(directory):
     return dict(sorted(zip(columns, data)))
 
 
-def serial_upload(dataset, files, engine, chunksize=10000, unique_only=True, srid=4326):
+def serial_upload(dataset, files, engine, chunksize=100, unique_only=True, srid=4326):
     """
     Uploads files from given dataset. All files must be from the same dataset.
 
@@ -341,7 +341,8 @@ def serial_upload(dataset, files, engine, chunksize=10000, unique_only=True, sri
 
     try:
         # Probably some sqlalchemy magic I can do instead of straight SQL
-        cursor.execute('CREATE SCHEMA IF NOT EXISTS {};'.format(dataset))
+        cursor.execute('CREATE SCHEMA IF NOT EXISTS {};'.format(dataset.lower()))
+        connection.commit()
 
         pd_engine = sql.SQLDatabase(engine)
 
@@ -419,5 +420,5 @@ def serial_upload(dataset, files, engine, chunksize=10000, unique_only=True, sri
 
 func_map = {
     'LANDSAT_8_C1' : landsat_8_c1_to_sql,
-    'MASTER' : master_to_sql
+    'MASTER' : serial_upload
 }
