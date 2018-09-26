@@ -452,9 +452,8 @@ def date_converter(o):
     if isinstance(o, datetime):
         return o.isoformat()
 
-
 def print_dict(d):
-    logger.info(str(yaml.dump(json.loads(json.dumps(d, default=date_converter)), default_flow_style=False )))
+    print(str(yaml.dump(json.loads(json.dumps(d, default=date_converter)), default_flow_style=False )))
 
 def point_grid(img, nodata=-32768.0, step=50):
     arr = img.read_array()

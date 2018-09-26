@@ -257,7 +257,7 @@ def themis_pairs(root, id1, id2):
         bundle_parameters['cnet'] = cnet_path
         bundle_parameters['onet'] = cnet_path
         bundle_parameters['file_prefix'] = bundle_result_path+'/'
-        logger.info("Running Jigsaw, parameters:")
+        logger.info("Running Jigsaw, parameters:\n")
         utils.print_dict(bundle_parameters)
         try:
             jigsaw(**bundle_parameters)
@@ -361,7 +361,7 @@ def themis_pairs(root, id1, id2):
 
     img1_b9_bt_overlap = np.ma.MaskedArray(arr1.data, arr1.mask | arr2.mask)
     img2_b9_bt_overlap = np.ma.MaskedArray(arr2.data, arr1.mask | arr2.mask)
-    bt_diff = np.ma.MaskedArray(img1_b9_overlap.data-img2_b9_overlap.data, arr1.mask | arr2.mask)
+    bt_diff = np.ma.MaskedArray(img1_b9_bt_overlap.data-img2_b9_bt_overlap.data, arr1.mask | arr2.mask)
 
     img1bt = img1_b9_bt_overlap[~img1_b9_bt_overlap.mask]
     img2bt = img2_b9_bt_overlap[~img2_b9_bt_overlap.mask]
