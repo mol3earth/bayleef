@@ -139,18 +139,20 @@ def init(outfile, additional_kernels={}):
         logger.info("Running Spiceinit on {}".format(outfile))
         spiceinit(from_=outfile, spksmithed=True, **additional_kernels)
     except ProcessError as e:
-        logger.error('Spice Init Error')
         logger.error('file: {}'.format(outfile))
         logger.error("STDOUT: {}".format(e.stdout.decode('utf-8')))
         logger.error("STDERR: {}".format(e.stderr.decode('utf-8')))
+        raise Exception('Spice Init Error')
+
     try:
         logger.info("Running Footprintinit on {}".format(outfile))
         footprintinit(from_=outfile)
     except ProcessError as e:
-        logger.error('Footprint Init Error')
         logger.error('file: {}'.format(outfile))
         logger.error("STDOUT: {}".format(e.stdout.decode('utf-8')))
         logger.error("STDERR: {}".format(e.stderr.decode('utf-8')))
+        raise Exception('Footprint Init Error')
+
 
 
 def thm_crop(infile, outfile, minlat, maxlat):
@@ -171,7 +173,9 @@ def match_pair(img1_path, img2_path, figpath=None):
             lon = group[1]['PositiveEast360Longitude'].value
             points.append([lat, lon])
         except Exception as e:
-            logger.error("Failed to get lat lon from group:\n{}".format(group))
+            continue
+
+    logger.info("Found {} points, rejected {}".format(str(len(points)), str(len(src_points)-len(points))))
 
     if len(points) == 0:
         raise Exception("No valid points were found for pair {} {}".format(img1_path, img2_path))
