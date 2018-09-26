@@ -34,7 +34,7 @@ from pysis.isis import (cam2map, campt, footprintinit, jigsaw, map2map,
 sys.path.insert(0, os.path.abspath('..'))
 
 import logging
-logger = logging.getLogger('bayleef-cli')
+logger = logging.getLogger('bayleef')
 
 from bayleef import config
 

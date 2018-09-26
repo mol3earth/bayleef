@@ -51,7 +51,7 @@ from pysis.isis import (cam2map, campt, footprintinit, jigsaw, map2map,
 
 from . import utils
 import logging
-logger = logging.getLogger('bayleef-cli')
+logger = logging.getLogger('bayleef')
 
 plt.switch_backend('agg')
 
