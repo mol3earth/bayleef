@@ -258,7 +258,7 @@ def themis_pairs(root, id1, id2):
         bundle_parameters['onet'] = cnet_path
         bundle_parameters['file_prefix'] = bundle_result_path+'/'
         logger.info("Running Jigsaw, parameters:")
-        ultls.print_dict(bundle_parameters)
+        utils.print_dict(bundle_parameters)
         try:
             jigsaw(**bundle_parameters)
         except ProcessError as e:
@@ -437,7 +437,7 @@ def themis_pairs(root, id1, id2):
             df = pd.read_csv(metadata['bundle']['residuals'], header=1)
         except:
             df = pd.read_csv(metadata['bundle']['_residuals'], header=1)
-            
+
         metadata['bundle']['residual_stats'] = stats(np.asarray(df['residual.1'][1:], dtype=float))
 
     utils.print_dict(metadata)
