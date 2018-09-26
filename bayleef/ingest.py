@@ -169,6 +169,9 @@ def themis_pairs(root, id1, id2):
     pair_dir = os.path.join(data_dir, "THEMIS_PAIRS", id1, id2)
 
     map_file = config.themis.map_file
+    if not os.path.isfile(map_file):
+        raise Exception("{} does not exist.".format(map_file))
+
 
     pair_original_path = os.path.join(pair_dir, 'original')
     pair_images_path = os.path.join(pair_dir, 'images')
@@ -262,7 +265,10 @@ def themis_pairs(root, id1, id2):
             logger.error("STDOUT: {}".format(e.stdout.decode('utf-8')))
             logger.error("STDERR: {}".format(e.stderr.decode('utf-8')))
 
-    map_pvl = pvl.load(map_file)
+    try:
+        map_pvl = pvl.load(map_file)
+    except Exception as e:
+        logger.error("Error loading mapfile {}:\n{}".format(map_file, e))
 
     logger.info('Projecting {} to {} with map file:\n {}'.format(img1_cropped_path, img1_projected_path, map_pvl))
     utils.project(img1_cropped_path, img1_projected_path, map_file)
