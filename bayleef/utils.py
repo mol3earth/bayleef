@@ -34,7 +34,7 @@ from pysis.isis import (cam2map, campt, footprintinit, jigsaw, map2map,
 sys.path.insert(0, os.path.abspath('..'))
 
 import logging
-logger = logging.getLogger('bayleef')
+logger = logging.getLogger('Bayleef')
 
 from bayleef import config
 
@@ -141,16 +141,16 @@ def init(outfile, additional_kernels={}):
     except ProcessError as e:
         logger.error('Spice Init Error')
         logger.error('file: {}'.format(outfile))
-        logger.error("STDOUT:", e.stdout.decode('utf-8'))
-        logger.error("STDERR:", e.stderr.decode('utf-8'))
+        logger.error("STDOUT: {}".format(e.stdout.decode('utf-8')))
+        logger.error("STDERR: {}".format(e.stderr.decode('utf-8')))
     try:
         logger.info("Running Footprintinit on {}".format(outfile))
         footprintinit(from_=outfile)
     except ProcessError as e:
         logger.error('Footprint Init Error')
         logger.error('file: {}'.format(outfile))
-        logger.error("STDOUT:", e.stdout.decode('utf-8'))
-        logger.error("STDERR:", e.stderr.decode('utf-8'))
+        logger.error("STDOUT: {}".format(e.stdout.decode('utf-8')))
+        logger.error("STDERR: {}".format(e.stderr.decode('utf-8')))
 
 
 def thm_crop(infile, outfile, minlat, maxlat):
@@ -377,8 +377,8 @@ def preprocess(thm_id, outdir, day=True, validate=False, projected_images=True, 
             except ProcessError as e:
                 logger.info('campt Error')
                 logger.info('file: {}'.format(outfile))
-                logger.info("STDOUT:", e.stdout.decode('utf-8'))
-                logger.info("STDERR:", e.stderr.decode('utf-8'))
+                logger.error("STDOUT: {}".format(e.stdout.decode('utf-8')))
+                logger.error("STDERR: {}".format(e.stderr.decode('utf-8')))
 
             incidence_angle = label['GroundPoint']['Incidence'].value
 
@@ -430,7 +430,7 @@ def preprocess(thm_id, outdir, day=True, validate=False, projected_images=True, 
     if images:
         for band in range(1,nbands+1):
             tiffpath = os.path.join(images, 'b{}.tiff'.format(band))
-            logger.info('Writing:', tiffpath)
+            logger.info('Writing: {}'.format(tiffpath))
             gdal.Translate(tiffpath, ogcube, bandList=[band], format='GTiff')
 
     return bool(kerns)
@@ -445,8 +445,6 @@ def date_converter(o):
 
 def print_dict(d):
     logger.info(str(yaml.dump(json.loads(json.dumps(d, default=date_converter)), default_flow_style=False )))
-
-
 
 def point_grid(img, nodata=-32768.0, step=50):
     arr = img.read_array()
@@ -483,16 +481,16 @@ def project(img, to, mapfile, matchmap=False):
             map2map(**params)
         except ProcessError as e:
             logger.info('map2map Error')
-            logger.info("STDOUT:", e.stdout.decode('utf-8'))
-            logger.info("STDERR:", e.stderr.decode('utf-8'))
+            logger.error("STDOUT: {}".format(e.stdout.decode('utf-8')))
+            logger.error("STDERR: {}".format(e.stderr.decode('utf-8')))
     else:
         try:
             logger.info('Running cam2map on {}'.format(img))
             cam2map(**params)
         except ProcessError as e:
             logger.info('cam2map Error')
-            logger.info("STDOUT:", e.stdout.decode('utf-8'))
-            logger.info("STDERR:", e.stderr.decode('utf-8'))
+            logger.error("STDOUT: {}".format(e.stdout.decode('utf-8')))
+            logger.error("STDERR: {}".format(e.stderr.decode('utf-8')))
 
 
 def get_controlled_kernels(thmid, kernel_dir=config.themis.controlled_kernels, day=True):
