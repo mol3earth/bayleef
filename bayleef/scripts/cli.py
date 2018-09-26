@@ -29,7 +29,7 @@ from .. import pysbatch
 from bayleef import config
 from bayleef import config_file
 
-LOG_FORMAT = '%(asctime)-15s ->> %(message)s'
+LOG_FORMAT = '%(asctime)-15s::%(name)s::%(levelname)s ->> %(message)s'
 logging.basicConfig(format=LOG_FORMAT)
 logger = logging.getLogger('bayleef-cli')
 logger.setLevel(logging.INFO)

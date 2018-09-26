@@ -403,8 +403,9 @@ def preprocess(thm_id, outdir, day=True, validate=False, projected_images=True, 
         meta = json.loads(json.dumps(img.metadata, default = lambda o:str(o) if isinstance(o, datetime) else o))
         try:
             meta['map_file'] = str(pvl.load(map_file))
-        except Exeption as e:
+        except Exception as e:
             logger.error("Failed to load map file {}:\n{}".format(map_file, e))
+            raise Exception("Invalid map file.")
 
         json.dump(meta, open(metafile, 'w+'))
         if kerns:
@@ -415,7 +416,7 @@ def preprocess(thm_id, outdir, day=True, validate=False, projected_images=True, 
         date = img.metadata['IsisCube']['Instrument']['StartTime']
         index_meta = {}
         index_meta['geom'] = img.footprint.ExportToWkt()
-        index_meta['id'] = id1
+        index_meta['id'] = thm_id
         index_meta['time'] = {}
         index_meta['time']['year'] = date.year
         index_meta['time']['month'] = date.month
