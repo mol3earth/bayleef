@@ -401,7 +401,11 @@ def preprocess(thm_id, outdir, day=True, validate=False, projected_images=True, 
 
     if meta:
         meta = json.loads(json.dumps(img.metadata, default = lambda o:str(o) if isinstance(o, datetime) else o))
-        meta['map_file'] = str(pvl.load(map_file))
+        try:
+            meta['map_file'] = str(pvl.load(map_file))
+        except Exeption as e:
+            logger.error("Failed to load map file {}:\n{}".format(map_file, e))
+
         json.dump(meta, open(metafile, 'w+'))
         if kerns:
             logger.info('Used Controlled Kernels')
@@ -493,7 +497,7 @@ def project(img, to, mapfile, matchmap=False):
 def get_controlled_kernels(thmid, kernel_dir=config.themis.controlled_kernels, day=True):
     if not kernel_dir:
         return {}
-        
+
     found = False
     if day:
         kernels = os.path.join(kernel_dir, 'DIR')
