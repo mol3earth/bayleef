@@ -29,9 +29,9 @@ from .. import pysbatch
 from bayleef import config
 from bayleef import config_file
 
-LOG_FORMAT = '%(asctime)-15s::%(name)s::%(levelname)s ->> %(message)s'
+LOG_FORMAT = '%(name)s::%(asctime)-15s::%(levelname)s || %(message)s'
 logging.basicConfig(format=LOG_FORMAT)
-logger = logging.getLogger('bayleef')
+logger = logging.getLogger('Bayleef')
 logger.setLevel(logging.INFO)
 
 def get_node(dataset, node=None):
