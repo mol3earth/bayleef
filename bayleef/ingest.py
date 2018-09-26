@@ -246,7 +246,7 @@ def themis_pairs(root, id1, id2):
 
     used_smithed = True
     if not (img1_smithed and img2_smithed):
-        logger.info("No smither kernels found, matching with Autocnet.")
+        logger.info("No smithed kernels found, matching with Autocnet.")
         used_smithed = False
         cg = utils.match_pair(img1_cropped_path, img2_cropped_path, figpath=autocnet_plot_path)
         cg.generate_control_network()

@@ -166,9 +166,15 @@ def match_pair(img1_path, img2_path, figpath=None):
     label = pvl.loads(campt(from_=img1_path, coordlist='temp.txt', coordtype='image'))
     points = []
     for group in label:
-        lat = group[1]['PlanetocentricLatitude'].value
-        lon = group[1]['PositiveEast360Longitude'].value
-        points.append([lat, lon])
+        try:
+            lat = group[1]['PlanetocentricLatitude'].value
+            lon = group[1]['PositiveEast360Longitude'].value
+            points.append([lat, lon])
+        except Exception as e:
+            logger.error("Failed to get lat lon from group:\n{}".format(group))
+
+    if len(points) == 0:
+        raise Exception("No valid points were found for pair {} {}".format(img1_path, img2_path))
 
     f = open('temp.txt', 'w+')
     f.write('\n'.join('{}, {}'.format(x,y) for x,y in points))
