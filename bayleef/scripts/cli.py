@@ -31,7 +31,7 @@ from bayleef import config_file
 
 LOG_FORMAT = '%(asctime)-15s::%(name)s::%(levelname)s ->> %(message)s'
 logging.basicConfig(format=LOG_FORMAT)
-logger = logging.getLogger('bayleef-cli')
+logger = logging.getLogger('bayleef')
 logger.setLevel(logging.INFO)
 
 def get_node(dataset, node=None):
