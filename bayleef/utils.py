@@ -175,7 +175,7 @@ def match_pair(img1_path, img2_path, figpath=None):
         except Exception as e:
             continue
 
-    logger.info("Found {} points, rejected {}".format(str(len(points)), str(len(src_points)-len(points))))
+    logger.info("{} match points found, rejected {}".format(str(len(points)), str(len(src_points)-len(points))))
 
     if len(points) == 0:
         raise Exception("No valid points were found for pair {} {}".format(img1_path, img2_path))
