@@ -389,7 +389,7 @@ def sbatch_master(input, bayleef_data, add_option, njobs, **options):
 
     for i, file in enumerate(files):
         command = "bayleef load-master '{}' '{}'".format(file, bayleef_data)
-        job_name = 'bayleef_{}_{}'.format(i, os.path.splitext(os.path.basename(file))[0])
+        job_name = 'bayleef_{}_{}'.format(i, os.path.splitext(os.path.basename(file))[0] )
         log_file = os.path.join(options['log'], job_name+'.log')
 
         logger.info("{}/{}".format(i, len(files)))
@@ -402,9 +402,10 @@ def sbatch_master(input, bayleef_data, add_option, njobs, **options):
         if njobs != -1:
             pysbatch.limit_jobs(njobs)
 
+
 @click.command()
 @click.argument("input", required=True)
-@click.argument("--data", "-d", default=config.data)
+@click.argument("--bayleef_data", "-d", default=config.data)
 @click.option("-r", is_flag=True, help="Set to recursively glob .HDF files (Warning: Every .HDF file under the directory will be treated as a Master file)")
 def load_master(input, bayleef_data, r):
     """
@@ -437,17 +438,10 @@ def load_master(input, bayleef_data, r):
 @click.command()
 @click.argument("id1", required=True)
 @click.argument("id2", required=True)
-@click.option("--data", "-d", default=config.data)
+@click.option("--bayleef_data", "-d", default=config.data)
 def themis_pairs(id1, id2, bayleef_data):
     from bayleef.ingest import themis_pairs
     ingest.themis_pairs(bayleef_data, id1, id2)
-
-@click.command()
-@click.argument("cmd", required=True)
-@click.argument('args', nargs=-1)
-def hyper(cmd, args):
-    print(cmd)
-    print(args)
 
 
 @click.command()
@@ -455,6 +449,20 @@ def config_call():
     logger.info("Config file located in: {}".format(config_file))
     utils.print_dict(config)
 
+@click.command()
+@click.argument("file", required=True)
+@click.option("--log", "-l", default='.', help="Log output directory, default is the current working directory")
+@click.option("--njobs", "-n", default=-1, help="Max number of conccurent jobs, -1 for unlimited. Default = -1")
+def agility(file, njobs, log):
+    logger.log("Using {}".format(file))
+
+
+
+
+
+
+
+bayleef.add_command(agility, "agility", "")
 bayleef.add_command(config_call, "config")
 bayleef.add_command(themis_pairs, "themis-pairs")
 bayleef.add_command(to_sql, "to-sql")
