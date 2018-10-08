@@ -14,7 +14,7 @@ themis:
       camsolve : accelerations
       twist : yes
       overexisting : yes
-      spsolve : no
+      spsolve : NONE
       camera_angles_sigma : .25
       camera_angular_velocity_sigma : .1
       camera_angular_acceleration_sigma : .01
