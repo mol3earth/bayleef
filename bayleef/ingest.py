@@ -174,7 +174,7 @@ def themis_pairs(root, id1, id2):
 
 
     pair_original_path = os.path.join(pair_dir, 'original')
-    pair_images_path = os.path.join(pair_dir, 'images')
+    pair_images_path = os.path.join(pair_dir, 'imagedata')
     bundle_result_path = os.path.join(pair_dir, 'bundle')
     plot_path = os.path.join(pair_dir, 'plots')
 

@@ -338,25 +338,22 @@ def to_sql(db, dataset, root, host, port, user, password):
     """
     Upload the dataset to a database
     """
-    if not dataset in sql.func_map.keys():
-        logger.error("{} is not a valid dataset".format(dataset))
-
     dataset_root = os.path.join(root, dataset)
 
     # The dirs with important files will always be in leaf nodes
-    leaf_dirs = list()
+    leef_dirs = list()
     for root, dirs, files in os.walk(dataset_root):
-        if files and [f for f in files if not f.startswith('.')]:
-            leaf_dirs.append(root)
+        if "images" in dirs and "original" in dirs and "metadata.json" in files and "index.json" in files:
+            leef_dirs.append(root)
 
-    logger.info("{} Folders found".format(len(leaf_dirs)))
+    logger.info("{} Folders found".format(len(leef_dirs)))
 
     # only suppoort postgres for now
     engine = create_engine('postgresql://{}:{}@{}:{}/{}'.format(user,password,host,port,db))
     try:
-        sql.serial_upload(dataset, lead_dirs)
+        sql.serial_upload(dataset, leef_dirs, engine)
     except:
-        for dir in leaf_dirs:
+        for dir in leef_dirs:
             logger.info("Uploading {}".format(dir))
             try:
                 sql.func_map[dataset](dir, engine)
