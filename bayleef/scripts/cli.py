@@ -29,6 +29,12 @@ from .. import pysbatch
 from bayleef import config
 from bayleef import config_file
 
+
+from collections import OrderedDict
+from sys import stdin
+from os import isatty
+import subprocess
+
 LOG_FORMAT = '%(name)s::%(asctime)-15s::%(levelname)s || %(message)s'
 logging.basicConfig(format=LOG_FORMAT)
 logger = logging.getLogger('Bayleef')
@@ -435,34 +441,105 @@ def load_master(input, bayleef_data, r):
         ingest.master(bayleef_data, file)
 
 
-@click.command()
-@click.argument("id1", required=True)
-@click.argument("id2", required=True)
-@click.option("--bayleef_data", "-d", default=config.data)
-def themis_pairs(id1, id2, bayleef_data):
-    from bayleef.ingest import themis_pairs
-    ingest.themis_pairs(bayleef_data, id1, id2)
+def batch_jobs(jobs, log=".", njobs=-1,  **sbatch_kwargs):
+    logger.info("Jobs:")
+    utils.print_dict(jobs)
 
+    if isinstance(jobs, list):
+        jobs = OrderedDict({"step1" : jobs})
+
+    for step in jobs:
+        joblist = []
+        commands = jobs[step]
+
+        logger.info("Running {} jobs for {}".format(len(commands), step))
+
+        for i, command in enumerate(commands):
+            job_name = 'bayleef_{}_{}'.format("".join(step.split()), i)
+            joblist.append(job_name)
+            log_file = os.path.join(log, job_name+'.log')
+
+            logger.info("{} {}/{}".format(step, i+1, len(commands)))
+            logger.info("Dispatching {}".format(command))
+            logger.info('Jobname: {}'.format(job_name))
+            logger.info('Log File: {}'.format(log_file))
+            out = pysbatch.sbatch(wrap=command, job_name=job_name, log=log_file, **sbatch_kwargs)
+            logger.info(out.lstrip().rstrip())
+            if njobs != -1:
+                pysbatch.limit_jobs(njobs)
+
+        logger.info("Waiting for jobs in {} to complete.".format(step))
+        pysbatch.wait_for_jobs(joblist)
+
+
+@click.command()
+@click.argument("id1", required=False)
+@click.argument("id2", required=False)
+@click.option("--file", "-f", default=None)
+@click.option("--log", "-l", default='.', help="Log output directory, default is current working directory.")
+@click.option("--mem", '-m', default='4', help="Memory per job in gigabytes. Default = 4")
+@click.option("--time", "-t", default='01:00:00', help="Max time per job, default = one hour.")
+@click.option("--njobs", "-n", default=-1, help="Max number of conccurent jobs, -1 for unlimited. Default = -1")
+@click.option("--bayleef_data", "-d", default=config.data)
+def themis_pairs(id1, id2, file, log, mem, time, njobs, bayleef_data):
+    from bayleef.ingest import themis_pairs
+
+    if file:
+        pairs = open(file).read()
+        pairs = pairs.split("\n")
+        commands = {"themis_pairs" : ["bayleef themis-pairs -d {} {}".format(bayleef_data, pair) for pair in pairs]}
+        batch_jobs(commands, log=log, mem=mem, time=time, njobs=njobs)
+
+    else:
+        ingest.themis_pairs(bayleef_data, id1, id2)
 
 @click.command()
 def config_call():
     logger.info("Config file located in: {}".format(config_file))
     utils.print_dict(config)
 
-@click.command()
-@click.argument("file", required=True)
-@click.option("--log", "-l", default='.', help="Log output directory, default is the current working directory")
+@click.command(context_settings=dict(
+    ignore_unknown_options=True,
+    allow_extra_args=True,
+))
+@click.argument("job_file", required=False, default=None)
+@click.option("--add-option", "-ao", default='', help="Text containing misc. sbatch parameters")
+@click.option("--log", "-l", default='.', help="Log output directory, default is current working directory.")
+@click.option("--mem", '-m', default='4', help="Memory per job in gigabytes. Default = 4")
+@click.option("--time", "-t", default='01:00:00', help="Max time per job, default = one hour.")
 @click.option("--njobs", "-n", default=-1, help="Max number of conccurent jobs, -1 for unlimited. Default = -1")
-def agility(file, njobs, log):
-    logger.log("Using {}".format(file))
+def agility(job_file, add_option, njobs, time, mem, log, **options):
+    is_pipe = not isatty(stdin.fileno())
+    if is_pipe:
+        # get pipped in response
+        pipestr = ""
+        for line in sys.stdin:
+            pipestr += line
+
+    if not is_pipe and not job_file:
+        logger.error("No Valid input. Job File: {}".format(job_file))
+        exit(1)
+
+    if not os.path.exists(log):
+        raise Exception('Log directory {} is not a directory or does not exist'.format(options['log']))
+
+    if is_pipe:
+        try:
+            jobs = json.loads(pipestr, object_pairs_hook=OrderedDict)
+        except Exception as e:
+            logger.error("Not Valid Json\n{}".format(pipestr))
+            exit(1)
+    else:
+        try:
+            jobs = json.load(open(job_file), object_pairs_hook=OrderedDict)
+        except Exception as e:
+            logger.error("Cannot open {} for reading.".format(job_file))
+            exit(1)
+    batch_jobs(jobs, log=log, mem=mem, time=time, njobs=njobs)
 
 
-
-
-
-
-
-bayleef.add_command(agility, "agility", "")
+bayleef.add_command(agility, "agility")
+bayleef.add_command(agility, "sbatch")
 bayleef.add_command(config_call, "config")
 bayleef.add_command(themis_pairs, "themis-pairs")
 bayleef.add_command(to_sql, "to-sql")

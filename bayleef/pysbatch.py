@@ -1,5 +1,8 @@
 import subprocess as sps
 import sys, os, time
+import logging
+
+logger = logging.getLogger('Bayleef')
 
 """
 borrowed from https://github.com/Kelvinrr/pysbatch/blob/master/pysbatch/pysbatch.py
@@ -19,7 +22,9 @@ def sbatch(job_name="py_job", mem='8', cpus=1, dep="", time='3-0', log="submit.o
          '--out={}'.format(log)]
     sub.append('--wrap="{}"'.format(wrap.strip()))
     # print(" ".join(sub))
-    process = sps.Popen(" ".join(sub), shell=True, stdout=sps.PIPE)
+    command = " ".join(sub)
+    logger.info(command)
+    process = sps.Popen(command, shell=True, stdout=sps.PIPE)
     stdout = process.communicate()[0].decode("utf-8")
     return(stdout)
 
@@ -32,14 +37,23 @@ def run_cmd(cmd):
     return process.stdout.decode("utf-8")
 
 
+def wait_for_jobs(jobs):
+    # get the normal amount of lines in a default empty query
+    default_nlines = len(run_cmd(['squeue', '-u', os.environ['USER'], "--name=\"\""]).split("\n"))
+    jobflag = "--name=" + ",".join(jobs)
+    while len(run_cmd(['squeue', '-u', os.environ['USER'], jobflag]).split("\n"))-default_nlines > 0:
+        time.sleep(1)
+
+
 def limit_jobs(limit=20000):
-    l_jobs=run_cmd(['squeue', '-u', os.environ['USER'], '-t', 'running']).split("\n")
+    default_nlines = len(run_cmd(['squeue', '-u', os.environ['USER'], "--name=\"\""]).split("\n"))
+
     # limit the total number of jobs in slurm job queue
-    while len(l_jobs) >= limit:
-        time.sleep(1000)
+    while len(run_cmd(['squeue', '-u', os.environ['USER'], '-t', 'running']).split("\n")) >= limit:
+        time.sleep(1)
+
 
 def limit_queue(limit=20000):
-    l_jobs=run_cmd(['squeue', '-u', os.environ['USER']]).split("\n")
     # limit the total number of jobs in slurm job queue
-    while len(l_jobs) >= limit:
-        time.sleep(1000)
+    while len(run_cmd(['squeue', '-u', os.environ['USER']]).split("\n")) >= limit:
+        time.sleep(1)

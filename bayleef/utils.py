@@ -349,7 +349,7 @@ def normalize_image_res(image1, image2, image2out, image1out, out_type='ISIS3', 
     del(fp1, fp2)
 
 
-def preprocess(thm_id, outdir, day=True, validate=False, projected_images=True, map_file=config.map_file, originals=True, images=True, meta=True, index=True):
+def preprocess(thm_id, outdir, day=True, validate=False, projected_images=True, map_file=config.themis.map_file, originals=True, images=True, meta=True, index=True):
     '''
     Downloads Themis file by ID and runs it through spice init and
     footprint init.
@@ -371,7 +371,6 @@ def preprocess(thm_id, outdir, day=True, validate=False, projected_images=True, 
     if os.path.exists(outdir) and os.path.exists(original) and os.path.exists(metafile) and os.path.exists(indexfile) :
         logger.info("File {} Exists, skipping redownload.".format(outdir))
         return bool(kerns)
-
 
     if originals:
         if day:

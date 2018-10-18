@@ -8,7 +8,7 @@ __all__ = ['get_path']
 
 base = os.path.split(bayleef.__file__)[0]
 example_dir = os.path.join(base, 'examples')
-dirs = next(os.walk(example_dir))[1]
+dirs = next(os.walk(example_dir))[1] + [example_dir]
 file_2_dir = {}
 
 for d in dirs:
