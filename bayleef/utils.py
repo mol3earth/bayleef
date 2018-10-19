@@ -175,7 +175,7 @@ def match_pair(img1_path, img2_path, figpath=None):
         except Exception as e:
             continue
 
-    logger.info("{} match points found, rejected {}".format(str(len(points)), str(len(src_points)-len(points))))
+    logger.info("{} points from image1 successfully reprojected to image2, rejected {}".format(str(len(points)), str(len(src_points)-len(points))))
 
     if len(points) == 0:
         raise Exception("No valid points were found for pair {} {}".format(img1_path, img2_path))
@@ -195,7 +195,6 @@ def match_pair(img1_path, img2_path, figpath=None):
     filelist = [img1_path, img2_path]
     cg = CandidateGraph.from_filelist(filelist)
 
-    # The range of DN values over the data is small, so the threshold for differentiating interesting features must be small.
     edge = cg[0][1]['data']
     img1 = GeoDataset(img1_path)
     img2 = GeoDataset(img2_path)
@@ -248,8 +247,14 @@ def match_pair(img1_path, img2_path, figpath=None):
                                                   'destination_image', 'destination_idx',
                                                   'distance'])
 
+    if matches.empty:
+        logger.error("After matching points, matches dataframe returned empty.")
+
     dst_keypoints = pd.DataFrame(data=dst_keypoints, columns=['x', 'y', 'response', 'size', 'angle', 'octave', 'layer'])
     edge.destination._keypoints = dst_keypoints
+
+
+
     edge._matches = matches
     edge.compute_fundamental_matrix()
     distance_check(edge, clean_keys=['fundamental'])

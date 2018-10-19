@@ -469,9 +469,9 @@ def themis_pairs(root, id1, id2):
 
     index_path = os.path.join(pair_dir, 'index.json')
     index = {}
-    index['overlap_geom'] = GeoDataset(img1_cropped_path).footprint.Intersection(GeoDataset(img1_cropped_path).footprint).ExportToWkt()
-    index['img1_geom'] =  GeoDataset(img1_cropped_path).footprint.ExportToWkt()
-    index['img2_geom'] =  GeoDataset(img2_cropped_path).footprint.ExportToWkt()
+    index['overlap_geom'] = GeoDataset(img1_projected_path).footprint.Intersection(GeoDataset(img2_matchmapped_path).footprint).ExportToWkt()
+    index['img1_geom'] =  GeoDataset(img1_projected_path).footprint.ExportToWkt()
+    index['img2_geom'] =  GeoDataset(img2_matchmapped_path).footprint.ExportToWkt()
     index['id'] = '{}_{}'.format(id1, id2)
     json.dump(index, open(index_path, 'w+'))
 

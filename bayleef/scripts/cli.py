@@ -38,7 +38,7 @@ import subprocess
 LOG_FORMAT = '%(name)s::%(asctime)-15s::%(levelname)s || %(message)s'
 logging.basicConfig(format=LOG_FORMAT)
 logger = logging.getLogger('Bayleef')
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 def get_node(dataset, node=None):
 
@@ -488,6 +488,9 @@ def themis_pairs(id1, id2, file, log, mem, time, njobs, bayleef_data):
         batch_jobs(commands, log=log, mem=mem, time=time, njobs=njobs)
 
     else:
+        if not id1 or not id2:
+            logger.error("Invalid IDs: {} {}".format(id1, id2))
+            exit(0)
         ingest.themis_pairs(bayleef_data, id1, id2)
 
 @click.command()
