@@ -260,7 +260,7 @@ def match_pair(img1_path, img2_path, figpath=None):
     distance_check(edge, clean_keys=['fundamental'])
 
     if figpath:
-        plt.figure(figsize=(25,10))
+        plt.figure(figsize=(10,25))
         cg[0][1]['data'].plot(clean_keys=['fundamental', 'distance'], nodata=-32768.0)
         plt.savefig(figpath)
         plt.close()
