@@ -277,6 +277,10 @@ def themis_pairs(root, id1, id2):
     logger.info('Projecting {} to {} with map file:\n {}'.format(img2_cropped_path, img2_projected_path, map_pvl))
     utils.project(img2_cropped_path, img2_projected_path, map_file)
 
+    img1_footprint = GeoDataset(img1_projected_path).footprint
+    img2_footprint = GeoDataset(img2_projected_path).footprint
+    overlap_geom = img2_footprint.Intersection(img1_footprint)
+
     try:
         out1, err1 = utils.run_davinci('thm_tb.dv', img1_projected_path, img1_projected_bt_path)
         out2, err2 = utils.run_davinci('thm_tb.dv', img2_projected_path, img2_projected_bt_path)
@@ -468,10 +472,14 @@ def themis_pairs(root, id1, id2):
     json.dump(metadata,open(metadata_path, 'w+'), default=utils.date_converter)
 
     index_path = os.path.join(pair_dir, 'index.json')
+
     index = {}
-    index['overlap_geom'] = GeoDataset(img1_projected_path).footprint.Intersection(GeoDataset(img2_matchmapped_path).footprint).ExportToWkt()
-    index['img1_geom'] =  GeoDataset(img1_projected_path).footprint.ExportToWkt()
-    index['img2_geom'] =  GeoDataset(img2_matchmapped_path).footprint.ExportToWkt()
+    print(GeoDataset(img1_cropped_path).footprint.ExportToWkt())
+    print(GeoDataset(img2_cropped_path).footprint.ExportToWkt())
+
+    index['overlap_geom'] = overlap_geom.ExportToWkt()
+    index['img1_geom'] =  img1_footprint.ExportToWkt()
+    index['img2_geom'] =  img2_footprint.ExportToWkt()
     index['id'] = '{}_{}'.format(id1, id2)
     json.dump(index, open(index_path, 'w+'))
 
