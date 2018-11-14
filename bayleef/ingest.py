@@ -174,7 +174,7 @@ def themis_pairs(root, id1, id2):
 
 
     pair_original_path = os.path.join(pair_dir, 'original')
-    pair_images_path = os.path.join(pair_dir, 'images')
+    pair_images_path = os.path.join(pair_dir, 'imagedata')
     bundle_result_path = os.path.join(pair_dir, 'bundle')
     plot_path = os.path.join(pair_dir, 'plots')
 
@@ -231,8 +231,8 @@ def themis_pairs(root, id1, id2):
     img1_smithed = False
     img2_smithed = False
 
-    img1_smithed = utils.preprocess(id1, themis_dir1, day=True, validate=True, projected_images=False)
-    img2_smithed = utils.preprocess(id2, themis_dir2, day=True, validate=True, projected_images=False)
+    img1_smithed = utils.preprocess(id1, themis_dir1, day=True, validate=True, gtiffs=False, projected_images=False)
+    img2_smithed = utils.preprocess(id2, themis_dir2, day=True, validate=True, gtiffs=False, projected_images=False)
 
     img1_fh = GeoDataset(img1_path)
     img2_fh = GeoDataset(img2_path)
@@ -257,7 +257,7 @@ def themis_pairs(root, id1, id2):
         bundle_parameters['cnet'] = cnet_path
         bundle_parameters['onet'] = cnet_path
         bundle_parameters['file_prefix'] = bundle_result_path+'/'
-        logger.info("Running Jigsaw, parameters:")
+        logger.info("Running Jigsaw, parameters:\n")
         utils.print_dict(bundle_parameters)
         try:
             jigsaw(**bundle_parameters)
@@ -276,6 +276,10 @@ def themis_pairs(root, id1, id2):
 
     logger.info('Projecting {} to {} with map file:\n {}'.format(img2_cropped_path, img2_projected_path, map_pvl))
     utils.project(img2_cropped_path, img2_projected_path, map_file)
+
+    img1_footprint = GeoDataset(img1_projected_path).footprint
+    img2_footprint = GeoDataset(img2_projected_path).footprint
+    overlap_geom = img2_footprint.Intersection(img1_footprint)
 
     try:
         out1, err1 = utils.run_davinci('thm_tb.dv', img1_projected_path, img1_projected_bt_path)
@@ -334,13 +338,13 @@ def themis_pairs(root, id1, id2):
     img2_b9_overlap.data[img2_b9_overlap.mask] = 0
     rad_diff.data[rad_diff.mask] = 0
 
-    logger.info('Writing {}'.format(img1_b9_path))
-    ds = utils.array2raster(img1_projected_path, img1_b9_overlap, img1_b9_path)
-    del ds
-
-    logger.info('Writing {}'.format(img2_b9_path))
-    ds = utils.array2raster(img2_projected_path, img2_b9_overlap, img2_b9_path)
-    del ds
+    # logger.info('Writing {}'.format(img1_b9_path))
+    # ds = utils.array2raster(img1_projected_path, img1_b9_overlap, img1_b9_path)
+    # del ds
+    #
+    # logger.info('Writing {}'.format(img2_b9_path))
+    # ds = utils.array2raster(img2_projected_path, img2_b9_overlap, img2_b9_path)
+    # del ds
 
     logger.info('Writing {}'.format(rad_diff_image))
     ds = utils.array2raster(img1_projected_path, rad_diff, rad_diff_image)
@@ -361,7 +365,7 @@ def themis_pairs(root, id1, id2):
 
     img1_b9_bt_overlap = np.ma.MaskedArray(arr1.data, arr1.mask | arr2.mask)
     img2_b9_bt_overlap = np.ma.MaskedArray(arr2.data, arr1.mask | arr2.mask)
-    bt_diff = np.ma.MaskedArray(img1_b9_overlap.data-img2_b9_overlap.data, arr1.mask | arr2.mask)
+    bt_diff = np.ma.MaskedArray(img1_b9_bt_overlap.data-img2_b9_bt_overlap.data, arr1.mask | arr2.mask)
 
     img1bt = img1_b9_bt_overlap[~img1_b9_bt_overlap.mask]
     img2bt = img2_b9_bt_overlap[~img2_b9_bt_overlap.mask]
@@ -370,13 +374,13 @@ def themis_pairs(root, id1, id2):
     img2_b9_bt_overlap.data[img2_b9_bt_overlap.mask] = 0
     bt_diff.data[bt_diff.mask] = 0
 
-    logger.info('Writing {}'.format(img1_b9_bt_path))
-    ds = utils.array2raster(img1_projected_bt_path, img1_b9_bt_overlap, img1_b9_bt_path)
-    del ds
-
-    logger.info('Writing {}'.format(img2_b9_bt_path))
-    ds = utils.array2raster(img2_projected_bt_path, img2_b9_bt_overlap, img2_b9_bt_path)
-    del ds
+    # logger.info('Writing {}'.format(img1_b9_bt_path))
+    # ds = utils.array2raster(img1_projected_bt_path, img1_b9_bt_overlap, img1_b9_bt_path)
+    # del ds
+    #
+    # logger.info('Writing {}'.format(img2_b9_bt_path))
+    # ds = utils.array2raster(img2_projected_bt_path, img2_b9_bt_overlap, img2_b9_bt_path)
+    # del ds
 
     logger.info('Writing {}'.format(bt_diff_image))
     ds = utils.array2raster(img1_projected_bt_path, bt_diff, bt_diff_image)
@@ -468,10 +472,14 @@ def themis_pairs(root, id1, id2):
     json.dump(metadata,open(metadata_path, 'w+'), default=utils.date_converter)
 
     index_path = os.path.join(pair_dir, 'index.json')
+
     index = {}
-    index['overlap_geom'] = GeoDataset(img1_cropped_path).footprint.Intersection(GeoDataset(img1_cropped_path).footprint).ExportToWkt()
-    index['img1_geom'] =  GeoDataset(img1_cropped_path).footprint.ExportToWkt()
-    index['img2_geom'] =  GeoDataset(img2_cropped_path).footprint.ExportToWkt()
+    print(GeoDataset(img1_cropped_path).footprint.ExportToWkt())
+    print(GeoDataset(img2_cropped_path).footprint.ExportToWkt())
+
+    index['overlap_geom'] = overlap_geom.ExportToWkt()
+    index['img1_geom'] =  img1_footprint.ExportToWkt()
+    index['img2_geom'] =  img2_footprint.ExportToWkt()
     index['id'] = '{}_{}'.format(id1, id2)
     json.dump(index, open(index_path, 'w+'))
 

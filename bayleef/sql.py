@@ -14,12 +14,17 @@ import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from pandas.io import sql
 from matplotlib import rcParams
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from pylab import rcParams
 from sqlalchemy import *
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm.session import sessionmaker
+
+
+import logging
+logger = logging.getLogger('Bayleef')
 
 import bayleef
 import gdal
@@ -35,6 +40,7 @@ from geoalchemy2.shape import from_shape
 from plio.io.io_gdal import GeoDataset
 from shapely import wkt
 from shapely.geometry import Polygon
+from io import StringIO
 
 
 def landsat_8_c1_to_sql(folder, engine):
@@ -211,7 +217,11 @@ def get_meta(directory):
       Dictionary with row data
 
     """
-    metafile = path.join(directory, 'meta.json')
+    if os.path.exists(path.join(directory, 'meta.json')):
+        metafile = path.join(directory, 'meta.json')
+    else:
+        metafile = path.join(directory, 'metadata.json')
+
     index_file = path.join(directory, 'index.json')
 
     meta = json.dumps(json.load(open(metafile, 'r')))
@@ -241,12 +251,16 @@ def get_indices(directory):
     index_file = path.join(directory, 'index.json')
     indices = json.load(open(index_file, 'r'))
 
-    time = datetime(**indices['time'])
-    geom =  WKTElement(indices['geom'])
+    data = {}
 
-    columns = ['id', 'time', 'geom']
-    data = [indices['id'], time, geom]
-    return dict(zip(columns, data))
+    for key in indices.keys():
+        if "time" in key:
+            data[key] = datetime(**indices[key])
+        if "geom" in key:
+            data[key] = WKTElement(indices[key])
+        else:
+            data[key] = indices[key]
+    return data
 
 
 def get_imagedata(directory):
@@ -270,7 +284,7 @@ def get_imagedata(directory):
 
     images_path = path.join(directory, 'imagedata')
     files = glob(path.join(images_path, '*'))
-
+    print(files)
     columns = ['id'] + [path.splitext(path.basename(f))[0] for f in files]
     data = [indices['id']] + files
 
@@ -334,28 +348,35 @@ def serial_upload(dataset, files, engine, chunksize=100, unique_only=True, srid=
     chunks = [files[i:i + chunksize] for i in range(0, nfiles, chunksize)]
     connection = engine.raw_connection()
     cursor = connection.cursor()
-
+    dataset = dataset.lower()
     current_ids_in_db = None
+    # Probably some sqlalchemy magic I can do instead of straight SQL
+    cursor.execute('CREATE SCHEMA IF NOT EXISTS {};'.format(dataset))
+    connection.commit()
     if unique_only:
-        current_ids_in_db = set(pd.read_sql('select id from {}.indices'.format(dataset), engine)['id'])
+        try:
+            current_ids_in_db = set(pd.read_sql('select id from {}.indices'.format(dataset), engine)['id'])
+        except:
+            current_ids_in_db = {}
 
     try:
-        # Probably some sqlalchemy magic I can do instead of straight SQL
-        cursor.execute('CREATE SCHEMA IF NOT EXISTS {};'.format(dataset.lower()))
-        connection.commit()
 
         pd_engine = sql.SQLDatabase(engine)
 
         # too much boilerplate...
         for chunk in chunks:
+            logger.info("Uploading:\n{}".format(chunk))
             indices = gpd.GeoDataFrame.from_dict([get_indices(file) for file in chunk])
             meta = pd.DataFrame.from_dict([get_meta(file) for file in chunk])
             imagedata = pd.DataFrame.from_dict([get_imagedata(file) for file in chunk])
             ogdata = pd.DataFrame.from_dict([get_originaldata(file) for file in chunk])
+            index_columns = indices.columns
+            geo_columns = [c for c in index_columns if "geom" in c]
+            index_dtypes = dict(zip(geo_columns, [Geometry('POLYGON')]*len(geo_columns)))
 
             # create the table using pandas to generate the schema, this avoids
             # some convoluded sqlalchemy code, although is this any better?
-            indices_table = pd.io.sql.SQLTable('indices', pd_engine, frame=indices, schema=dataset, index=False, if_exists='append',dtype={'geom': Geometry('POLYGON')})
+            indices_table = pd.io.sql.SQLTable('indices', pd_engine, frame=indices, schema=dataset, index=False, if_exists='append',dtype=index_dtypes)
             meta_table = pd.io.sql.SQLTable('meta', pd_engine, frame=meta, schema=dataset, index=False, if_exists='append',dtype={'meta':JSONB})
             imagedata_table = pd.io.sql.SQLTable('imagedata', pd_engine, frame=imagedata, schema=dataset, index=False, if_exists='append')
             ogdata_table = pd.io.sql.SQLTable('original', pd_engine, frame=ogdata, schema=dataset, index=False, if_exists='append')
@@ -398,15 +419,18 @@ def serial_upload(dataset, files, engine, chunksize=100, unique_only=True, srid=
         meta_pk_create = 'ALTER TABLE {}.meta ADD PRIMARY KEY (id);'.format(dataset)
         imagedata_pk_create = 'ALTER TABLE {}.imagedata ADD PRIMARY KEY (id);'.format(dataset)
         original_pk_create = 'ALTER TABLE {}.original ADD PRIMARY KEY (id);'.format(dataset)
-        geo_index_create = 'CREATE INDEX IF NOT EXISTS idx_{}_indices_geom ON {}.indices USING gist(geom);'.format(dataset, dataset)
-        time_index_create = 'CREATE INDEX IF NOT EXISTS ids_{}_indices_time ON {}.indices USING BTREE(time);'.format(dataset, dataset)
-
         cursor.execute(indices_pk_create)
         cursor.execute(meta_pk_create)
         cursor.execute(imagedata_pk_create)
         cursor.execute(original_pk_create)
-        cursor.execute(time_index_create)
-        cursor.execute(geo_index_create)
+
+        for column in index_columns:
+            if "geom" in column:
+                geo_index_create = 'CREATE INDEX IF NOT EXISTS idx_{}_indices_geom ON {}.indices USING gist({});'.format(dataset, dataset, column)
+                cursor.execute(geo_index_create)
+            if "time" in column:
+                time_index_create = 'CREATE INDEX IF NOT EXISTS ids_{}_indices_time ON {}.indices USING BTREE(time);'.format(dataset, dataset, column)
+                cursor.execute(time_index_create)
 
         connection.commit()
     except Exception as e:

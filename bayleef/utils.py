@@ -175,7 +175,7 @@ def match_pair(img1_path, img2_path, figpath=None):
         except Exception as e:
             continue
 
-    logger.info("{} match points found, rejected {}".format(str(len(points)), str(len(src_points)-len(points))))
+    logger.info("{} points from image1 successfully reprojected to image2, rejected {}".format(str(len(points)), str(len(src_points)-len(points))))
 
     if len(points) == 0:
         raise Exception("No valid points were found for pair {} {}".format(img1_path, img2_path))
@@ -195,7 +195,6 @@ def match_pair(img1_path, img2_path, figpath=None):
     filelist = [img1_path, img2_path]
     cg = CandidateGraph.from_filelist(filelist)
 
-    # The range of DN values over the data is small, so the threshold for differentiating interesting features must be small.
     edge = cg[0][1]['data']
     img1 = GeoDataset(img1_path)
     img2 = GeoDataset(img2_path)
@@ -248,13 +247,20 @@ def match_pair(img1_path, img2_path, figpath=None):
                                                   'destination_image', 'destination_idx',
                                                   'distance'])
 
+    if matches.empty:
+        logger.error("After matching points, matches dataframe returned empty.")
+
     dst_keypoints = pd.DataFrame(data=dst_keypoints, columns=['x', 'y', 'response', 'size', 'angle', 'octave', 'layer'])
     edge.destination._keypoints = dst_keypoints
+
+
+
     edge._matches = matches
     edge.compute_fundamental_matrix()
     distance_check(edge, clean_keys=['fundamental'])
 
     if figpath:
+        plt.figure(figsize=(10,25))
         cg[0][1]['data'].plot(clean_keys=['fundamental', 'distance'], nodata=-32768.0)
         plt.savefig(figpath)
         plt.close()
@@ -349,7 +355,7 @@ def normalize_image_res(image1, image2, image2out, image1out, out_type='ISIS3', 
     del(fp1, fp2)
 
 
-def preprocess(thm_id, outdir, day=True, validate=False, projected_images=True, map_file=config.themis.map_file, originals=True, images=True, meta=True, index=True):
+def preprocess(thm_id, outdir, day=True, validate=False, projected_images=True, map_file=config.themis.map_file, originals=True, gtiffs=False, meta=True, index=True):
     '''
     Downloads Themis file by ID and runs it through spice init and
     footprint init.
@@ -371,7 +377,6 @@ def preprocess(thm_id, outdir, day=True, validate=False, projected_images=True, 
     if os.path.exists(outdir) and os.path.exists(original) and os.path.exists(metafile) and os.path.exists(indexfile) :
         logger.info("File {} Exists, skipping redownload.".format(outdir))
         return bool(kerns)
-
 
     if originals:
         if day:
@@ -437,7 +442,7 @@ def preprocess(thm_id, outdir, day=True, validate=False, projected_images=True, 
 
     del img
 
-    if images:
+    if gtiffs:
         for band in range(1,nbands+1):
             tiffpath = os.path.join(images, 'b{}.tiff'.format(band))
             logger.info('Writing: {}'.format(tiffpath))
@@ -452,9 +457,8 @@ def date_converter(o):
     if isinstance(o, datetime):
         return o.isoformat()
 
-
 def print_dict(d):
-    logger.info(str(yaml.dump(json.loads(json.dumps(d, default=date_converter)), default_flow_style=False )))
+    print(str(yaml.dump(json.loads(json.dumps(d, default=date_converter)), default_flow_style=False )))
 
 def point_grid(img, nodata=-32768.0, step=50):
     arr = img.read_array()

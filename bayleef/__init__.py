@@ -54,11 +54,11 @@ class dotdict(dict):
 config_file = os.path.join(get_path('config'), 'config.yaml')
 config = None
 
-os.makedirs(os.path.join(Path.home(), ".bayleef"), exist_ok=True)
-if not os.path.isfile(os.path.join(Path.home(), ".bayleef", "config.yaml")):
-    copyfile(config_file, os.path.join(Path.home(), ".bayleef", "config.yaml"))
+os.makedirs(os.path.join(str(Path.home()), ".bayleef"), exist_ok=True)
+if not os.path.isfile(os.path.join(str(Path.home()), ".bayleef", "config.yaml")):
+    copyfile(config_file, os.path.join(str(Path.home()), ".bayleef", "config.yaml"))
     config = dotdict(yaml.load(open(config_file)))
 else:
-    config = dotdict(yaml.load(open(os.path.join(Path.home(), ".bayleef", "config.yaml"))))
+    config = dotdict(yaml.load(open(os.path.join(str(Path.home()), ".bayleef", "config.yaml"))))
 
-config_file = os.path.join(Path.home(), ".bayleef", "config.yaml")
+config_file = os.path.join(str(Path.home()), ".bayleef", "config.yaml")
