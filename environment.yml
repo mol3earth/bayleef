@@ -202,7 +202,9 @@ dependencies:
   - zlib=1.2.11
   - zope.interface=4.5.0
   - cyvlfeat=0.4.6
-  - libcsm=3.0.3
-  - plio=0.1.4
-  - usgscam=0.1.0
-prefix: /scratch/krodriguez/anaconda/envs/autocnet
+  - libcsm
+  - plio
+  - csmapi
+  - pip
+  - pip:
+    - pysis
