@@ -231,8 +231,8 @@ def themis_pairs(root, id1, id2):
     img1_smithed = False
     img2_smithed = False
 
-    img1_smithed = utils.preprocess(id1, themis_dir1, day=True, validate=True, projected_images=False)
-    img2_smithed = utils.preprocess(id2, themis_dir2, day=True, validate=True, projected_images=False)
+    img1_smithed = utils.preprocess(id1, themis_dir1, day=True, validate=True, gtiffs=False, projected_images=False)
+    img2_smithed = utils.preprocess(id2, themis_dir2, day=True, validate=True, gtiffs=False, projected_images=False)
 
     img1_fh = GeoDataset(img1_path)
     img2_fh = GeoDataset(img2_path)
@@ -338,13 +338,13 @@ def themis_pairs(root, id1, id2):
     img2_b9_overlap.data[img2_b9_overlap.mask] = 0
     rad_diff.data[rad_diff.mask] = 0
 
-    logger.info('Writing {}'.format(img1_b9_path))
-    ds = utils.array2raster(img1_projected_path, img1_b9_overlap, img1_b9_path)
-    del ds
-
-    logger.info('Writing {}'.format(img2_b9_path))
-    ds = utils.array2raster(img2_projected_path, img2_b9_overlap, img2_b9_path)
-    del ds
+    # logger.info('Writing {}'.format(img1_b9_path))
+    # ds = utils.array2raster(img1_projected_path, img1_b9_overlap, img1_b9_path)
+    # del ds
+    #
+    # logger.info('Writing {}'.format(img2_b9_path))
+    # ds = utils.array2raster(img2_projected_path, img2_b9_overlap, img2_b9_path)
+    # del ds
 
     logger.info('Writing {}'.format(rad_diff_image))
     ds = utils.array2raster(img1_projected_path, rad_diff, rad_diff_image)
@@ -374,13 +374,13 @@ def themis_pairs(root, id1, id2):
     img2_b9_bt_overlap.data[img2_b9_bt_overlap.mask] = 0
     bt_diff.data[bt_diff.mask] = 0
 
-    logger.info('Writing {}'.format(img1_b9_bt_path))
-    ds = utils.array2raster(img1_projected_bt_path, img1_b9_bt_overlap, img1_b9_bt_path)
-    del ds
-
-    logger.info('Writing {}'.format(img2_b9_bt_path))
-    ds = utils.array2raster(img2_projected_bt_path, img2_b9_bt_overlap, img2_b9_bt_path)
-    del ds
+    # logger.info('Writing {}'.format(img1_b9_bt_path))
+    # ds = utils.array2raster(img1_projected_bt_path, img1_b9_bt_overlap, img1_b9_bt_path)
+    # del ds
+    #
+    # logger.info('Writing {}'.format(img2_b9_bt_path))
+    # ds = utils.array2raster(img2_projected_bt_path, img2_b9_bt_overlap, img2_b9_bt_path)
+    # del ds
 
     logger.info('Writing {}'.format(bt_diff_image))
     ds = utils.array2raster(img1_projected_bt_path, bt_diff, bt_diff_image)
