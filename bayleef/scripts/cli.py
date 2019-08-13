@@ -6,6 +6,8 @@ import re
 import wget
 import tarfile
 import gdal
+import requests
+import h5py
 
 from threading import Thread
 from glob import glob
@@ -17,10 +19,15 @@ from plio.io.io_gdal import GeoDataset
 from datetime import datetime
 import errno
 from shutil import copyfile
+import shutil
 
+from bayleef import ingest
 from bayleef import api
+from bayleef import sql
 from bayleef.utils import get_path, geolocate, master_isvalid
 from bayleef.sql import func_map
+from urllib.parse import urlparse
+from os.path import splitext
 
 
 LOG_FORMAT = '%(asctime)-15s ->> %(message)s'
@@ -263,14 +270,23 @@ def batch_download(root, node):
     """
     Used with the search function to download the results returned from search
     """
+    def get_ext(url):
+        """Return the filename extension from url, or ''."""
+        parsed = urlparse(url)
+        root, ext = splitext(parsed.path)
+        return ext  # or ext[1:] if you don't want the leading '.'`
+
     def download_from_result(scene, root):
         scene_id = scene['entityId']
         temp_file = '{}.tar.gz'.format(scene_id)
-
         dataset = re.findall(r'dataset_name=[A-Z0-9_]*', scene['orderUrl'])[0]
         dataset = dataset.split('=')[1]
 
-        path = get_path(scene, root, dataset)
+        if(dataset != "LANDSAT_8_C1"):
+            path = get_path(scene, root, dataset, LANDSAT=False)
+        else:
+            path = get_path(scene, root, dataset)
+
         if os.path.exists(path):
             logger.warning('{} already in cache, skipping'.format(path))
             return
@@ -279,15 +295,55 @@ def batch_download(root, node):
         download_url = download_info['data'][0]
 
         logger.info('Downloading: {} from {}'.format(scene_id, download_url))
-        wget.download(download_url, temp_file)
-        print()
-        logger.info('Extracting to {}'.format(path))
-        tar = tarfile.open(temp_file)
-        tar.extractall(path=path)
-        tar.close()
-        logger.info('Removing {}'.format(temp_file))
-        os.remove(temp_file)
-        logger.info('{} complete'.format(scene_id))
+
+
+
+        # r = requests.get(download_url, auth=(username, password), stream=True)
+        if(dataset != "LANDSAT_8_C1"):
+
+            ext = get_ext(download_url)
+            temp_file = '{}{}'.format(scene_id, ext)
+
+            username = 'tthatcher'
+            password = 'Bayleef@admin1'
+
+            with requests.Session() as session:
+                session.auth = (username, password)
+                r1 = session.request('get', download_url)
+                r = session.get(r1.url, auth=(username, password))
+                if r.ok:
+                    with open(temp_file, 'wb') as f:
+                        for chunk in r.iter_content(chunk_size=512):
+                            f.write(chunk)
+                        f.close()
+
+            print("Downloaded to: {} \n".format(temp_file, download_url))
+
+            from pyhdf.SD import SD, SDC
+            hdf = SD(temp_file)
+            hdf.end()
+            logger.info('Moving to {}'.format(path))
+            os.makedirs(path,  mode=0o775, exist_ok=False)
+            shutil.move(temp_file, path + '/' + temp_file)
+            logger.info('{} completed'.format(scene_id))
+
+        else:
+
+            wget.download(download_url, temp_file)
+            print("Downloaded to: {} \n".format(temp_file, download_url))
+
+            logger.info('Extracting to {}'.format(path))
+            tar = tarfile.open(temp_file)
+            tar.extractall(path=path)
+            tar.close()
+            logger.info('Removing {}'.format(temp_file))
+            os.remove(temp_file)
+            logger.info('{} complete'.format(scene_id))
+
+
+
+
+
 
 
     # get pipped in response
@@ -320,89 +376,59 @@ def to_sql(db, dataset, root, host, port, user, password):
     """
     Upload the dataset to a database
     """
-    if not dataset in func_map.keys():
-        logger.error("{} is not a valid dataset".format(dataset))
-
     dataset_root = os.path.join(root, dataset)
 
     # The dirs with important files will always be in leaf nodes
-    leaf_dirs = list()
+    leef_dirs = list()
     for root, dirs, files in os.walk(dataset_root):
-        if files and [f for f in files if not f.startswith('.')]:
-            leaf_dirs.append(root)
+        if(dataset == "LANDSAT_8_C1"):
+            leef_dirs.append(root)
+        else:
+            if "imagedata" in dirs and "original" in dirs and "meta.json" in files and "index.json" in files:
+                leef_dirs.append(root)
 
-    logger.info("{} Folders found".format(len(leaf_dirs)))
+    logger.info("{} Folders found".format(len(leef_dirs)))
 
     # only suppoort postgres for now
     engine = create_engine('postgresql://{}:{}@{}:{}/{}'.format(user,password,host,port,db))
-    for dir in leaf_dirs:
+    for dir in leef_dirs:
         logger.info("Uploading {}".format(dir))
         try:
-            func_map[dataset](dir, engine)
+            sql.func_map[dataset](dataset, dir, engine)
         except Exception as e:
             logger.error("ERROR: {}".format(e))
             import traceback
             traceback.print_exc()
 
-@click.command()
-@click.argument("inroot")
-@click.argument("outroot")
-def load_master(inroot, outroot):
-    """
-    only temporary
 
+@click.command()
+@click.argument("input", required=True)
+@click.argument("bayleef_data")
+@click.option("-r", is_flag=True, help="Set to recursively glob .HDF files (Warning: Every .HDF file under the directory will be treated as a Master file)")
+def load_master(input, bayleef_data, r):
+    """
+    Load master data.
     parameters
     ----------
+    in : str
+         root directory containing master files, .HDFs are recursively globbed.
+    bayleef_data : str
+                   root of the bayleef data directory
     """
-    def master(root, masterhdf):
-        fd = GeoDataset(masterhdf)
-        date = datetime.strptime(fd.metadata['CompletionDate'] , "%d-%b-%Y %H:%M:%S")
-        line = fd.metadata['FlightLineNumber']
-        daytime_flag = fd.metadata['day_night_flag']
-        ID = fd.metadata['producer_granule_id'].split('.')[0]
 
-        path = os.path.join(root, 'MASTER',str(date.year), str(line), daytime_flag,ID)
-        newhdf = os.path.join(path, os.path.basename(masterhdf))
+    files = input
+    if not r: # if not recursive
+        files = [input]
+    else:
+        files = glob(input+'/**/*.hdf', recursive=True)
 
-        # Try making the directory
-        try:
-            os.makedirs(path)
-        except OSError as exc:
-            if exc.errno == errno.EEXIST and os.path.isdir(path):
-                pass
-            else:
-                raise
-
-        # copy original hdf
-        try:
-            copyfile(masterhdf, newhdf)
-        except shutil.SameFileError:
-            pass
-
-        # explicitly close file descriptor
-        del fd
-
-        fd = GeoDataset(newhdf)
-        subdatasets = fd.dataset.GetSubDatasets()
-
-        for dataset in subdatasets:
-            ofilename = '{}.vrt'.format(dataset[1].split()[1])
-            ofilename_abspath = os.path.join(path, ofilename)
-            gdal.Translate(ofilename_abspath, dataset[0], format="VRT")
-
-        # create geo corrected calibrated image
-        lats = os.path.join(path, 'PixelLatitude.vrt')
-        lons = os.path.join(path, 'PixelLongitude.vrt')
-        image = os.path.join(path, 'CalibratedData.vrt')
-        geocorrected_image = os.path.join(path, 'CalibratedData_Geo.tif')
-        geolocate(image, geocorrected_image, lats, lons)
-
-    files = glob(inroot+'/**/*.hdf', recursive=True)
     total = len(files)
-    logger.info('TOTAL: {}'.format(total))
+
+    logger.info("{} Files Found".format(total))
     for i, file in enumerate(files):
         logger.info('{}/{} ({}) - Proccessing {}'.format(i, total, round(i/total, 2), file))
-        master(outroot, file)
+        print('File being loaded: {}'.format(file))
+        ingest.master(bayleef_data, file)
 
 bayleef.add_command(to_sql, "to-sql")
 bayleef.add_command(login)
@@ -414,5 +440,4 @@ bayleef.add_command(search)
 bayleef.add_command(download_options, "download-options")
 bayleef.add_command(download_url, "download-url")
 bayleef.add_command(batch_download, "batch-download")
-bayleef.add_command(batch_download, "download")
 bayleef.add_command(load_master, "load-master")

@@ -1,7 +1,10 @@
 import traceback
 from glob import glob
 import pvl
+import json
 import os
+from os import path
+from io import StringIO
 
 import geopandas as gpd
 import pandas as pd
@@ -11,14 +14,120 @@ from geoalchemy2.shape import from_shape
 import shapely
 from shapely.geometry import Polygon
 from sqlalchemy import *
+from pandas.io import sql
 from plio.io.io_gdal import GeoDataset
+
+import logging
+logger = logging.getLogger('Bayleef')
 
 from bayleef.utils import get_path
 from bayleef.utils import keys_to_lower
 from bayleef.utils import apply_dict
+from sqlalchemy.dialects.postgresql import JSONB
 
 
-def landsat_8_c1_to_sql(folder, engine):
+def get_meta(directory):
+    """
+    Grabs metadata and returns a record dictionary, only really used for creating
+    tables being uploaded to Postgresself.
+    Parameters
+    ----------
+    directory : str
+                Folder with the bayleef package
+    Returns
+    -------
+    : dict
+      Dictionary with row data
+    """
+    if os.path.exists(path.join(directory, 'meta.json')):
+        metafile = path.join(directory, 'meta.json')
+    else:
+        metafile = path.join(directory, 'metadata.json')
+
+    index_file = path.join(directory, 'index.json')
+
+    meta = json.dumps(json.load(open(metafile, 'r')))
+    indices = json.load(open(index_file, 'r'))
+
+    columns = ['id', 'meta']
+    data = [indices['id'], meta]
+    return dict(zip(columns, data))
+
+def get_originaldata(directory):
+    """
+    Grabs original images and files from bayleef package and returns a record dictionary, only really used for creating
+    tables being uploaded to Postgresself.
+    Parameters
+    ----------
+    directory : str
+                Folder with the bayleef package
+    Returns
+    -------
+    : dict
+      Dictionary with row data
+    """
+    index_file = path.join(directory, 'index.json')
+    indices = json.load(open(index_file, 'r'))
+
+    ogdata_path = path.join(directory, 'original')
+    files = glob(path.join(ogdata_path, '*'))
+
+    columns = ['id'] + [path.splitext(path.basename(f))[0] for f in files]
+    data = [indices['id']] + files
+    return dict(sorted(zip(columns, data)))
+
+def get_imagedata(directory):
+    """
+    Grabs proccessed images and files from bayleef package and returns a record dictionary, only really used for creating
+    tables being uploaded to Postgresself.
+    Parameters
+    ----------
+    directory : str
+                Folder with the bayleef package
+    Returns
+    -------
+    : dict
+      Dictionary with row data
+    """
+    index_file = path.join(directory, 'index.json')
+    indices = json.load(open(index_file, 'r'))
+
+    images_path = path.join(directory, 'imagedata')
+    files = glob(path.join(images_path, '*'))
+    columns = ['id'] + [path.splitext(path.basename(f))[0] for f in files]
+    data = [indices['id']] + files
+
+    return dict(sorted(zip(columns, data)))
+
+def get_indices(directory):
+    """
+    Grabs indices from bayleef package and returns a record dictionary, only really used for creating
+    tables being uploaded to Postgresself.
+    Parameters
+    ----------
+    directory : str
+                Folder with the bayleef package
+    Returns
+    -------
+    : dict
+      Dictionary with row data
+    """
+    index_file = path.join(directory, 'index.json')
+
+    indices = json.load(open(index_file, 'r'))
+
+    data = {}
+
+    for key in indices.keys():
+        if "time" in key:
+            data[key] = datetime(**indices[key])
+        if "geom" in key:
+            data[key] = WKTElement(indices[key])
+        else:
+            data[key] = indices[key]
+    return data
+
+def landsat_8_c1_to_sql(dataset, folder, engine):
     """
     For tagging day night, the following info is used from USGS EROS:
 
@@ -85,7 +194,7 @@ def landsat_8_c1_to_sql(folder, engine):
         submeta = metadata[key]
         submeta['landsat_scene_id'] = pk
         df = gpd.GeoDataFrame.from_dict(submeta, orient='index').T
-        df.to_sql(key, engine, index=False, schema='landsat_8', if_exists='append')
+        df.to_sql(key, engine, index=False, schema='landsat_8_c1', if_exists='append')
 
     # Get spatiotemporal data
     pm = metadata['product_metadata']
@@ -116,66 +225,134 @@ def landsat_8_c1_to_sql(folder, engine):
         'metafile' : metafile,
         'ang' : ang
     }
-    gpd.GeoDataFrame(image_record, index=[0]).to_sql('images', engine, schema='landsat_8', if_exists='append', index=False,
+    gpd.GeoDataFrame(image_record, index=[0]).to_sql('images', engine, schema='landsat_8_c1', if_exists='append', index=False,
                                                         dtype={'geom': Geometry('POLYGON', srid=4326)})
 
 
+def aster_to_sql():
+    return 0
 
-def master_to_sql(directories, engine):
+def serial_upload(dataset, files, engine, chunksize=100, unique_only=True, srid=4326):
     """
-    """
-    metarecs = []
-    imagerecs = []
-
-    if isinstance(directories, str):
-        directories = [directories]
-
-    for directory in directories:
-        ID = os.path.basename(directory)
-        hdfs = os.path.join(directory, '{}.tif'.format(ID))
-        files = glob(os.path.join(directory,'*.tif'))
-        files = sorted(files)
-        filecolumns = ['id', 'time', 'geom', 'original'] + [os.path.basename(os.path.splitext(file)[0]).lower() for file in files]
-
+    Uploads files from given dataset. All files must be from the same dataset.
+     TODO: The boilerplate is real
+     parameters
+    ----------
+     dataset : str
+             case insensative dataset name (e.g. MASTER, LANDSAT_8_C1)
+     files : list
+            List of directories to upload
+     engine : sqlalchemy engine
+     chunksize : chunks files into n bunches
+     unique_only : If True, pulls all indices from DB and uses them to remove
+                  duplicates before upload. If False, this step is skipped, which
+                  means if any file is a duplicate, the entire transaction fails.
+     srid : geometry reference system for geometries
+     """
+    nfiles = len(files)
+    chunks = [files[i:i + chunksize] for i in range(0, nfiles, chunksize)]
+    connection = engine.raw_connection()
+    cursor = connection.cursor()
+    dataset = dataset.lower()
+    current_ids_in_db = None
+    # Probably some sqlalchemy magic I can do instead of straight SQL
+    cursor.execute('CREATE SCHEMA IF NOT EXISTS {};'.format(dataset))
+    connection.commit()
+    if unique_only:
         try:
-            # open any file to get metadata
-            ds = GeoDataset(directory+'/CalibratedData_Geo.tif')
-            meta = ds.metadata
-            meta['id'] = ID
+            current_ids_in_db = list(pd.read_sql('select id from {}.indices'.format(dataset), engine)['id'])
+        except:
+            current_ids_in_db = []
 
-            # array formatting for postgres
-            meta['scale_factor'] = '{'+meta['scale_factor']+'}'
+    try:
+        pd_engine = sql.SQLDatabase(engine)
 
-            for key in meta.keys():
-                val = meta.pop(key)
-                meta[key.lower()] = val
+         # too much boilerplate...
+        for chunk in chunks:
+            logger.info("Uploading:\n{}".format(chunk))
+            for file in chunk:
+                # Some chunks only have on item, and we need to iterate a List
+                # Not a string
+                if(type(chunk) is not list):
+                    file = chunk
 
-            del ds
+                indices = gpd.GeoDataFrame.from_records([get_indices(file)])
+                meta = pd.DataFrame.from_records([get_meta(file)])
+                imagedata = pd.DataFrame.from_records([get_imagedata(file)])
+                ogdata = pd.DataFrame.from_records([get_originaldata(file)])
 
-            date = datetime.strptime(meta['completiondate'] , "%d-%b-%Y %H:%M:%S")
+            index_columns = indices.columns
+            geo_columns = [c for c in index_columns if "geom" in c]
+            index_dtypes = dict(zip(geo_columns, [Geometry('POLYGON')]*len(geo_columns)))
 
-            ll = float(meta['lon_ll']), float(meta['lat_ll'])
-            lr = float(meta['lon_lr']),float (meta['lon_lr'])
-            ul = float(meta['lon_ul']), float(meta['lon_ul'])
-            ur = float(meta['lon_ur']), float (meta['lon_ur'])
+             # create the table using pandas to generate the schema, this avoids
+            # some convoluded sqlalchemy code, although is this any better?
+            indices_table = pd.io.sql.SQLTable('indices', pd_engine, frame=indices, schema=dataset, index=False, if_exists='append',dtype=index_dtypes)
+            meta_table = pd.io.sql.SQLTable('meta', pd_engine, frame=meta, schema=dataset, index=False, if_exists='append',dtype={'meta':JSONB})
+            imagedata_table = pd.io.sql.SQLTable('imagedata', pd_engine, frame=imagedata, schema=dataset, index=False, if_exists='append')
+            ogdata_table = pd.io.sql.SQLTable('original', pd_engine, frame=ogdata, schema=dataset, index=False, if_exists='append')
 
-            footprint = WKTElement(Polygon([ll, ul, ur, lr]), srid=4326)
+            if unique_only and current_ids_in_db:
+                indices_dups = indices['id'].isin(current_ids_in_db)
+                meta_dups = meta['id'].isin(current_ids_in_db)
+                imagedata_dups = imagedata['id'].isin(current_ids_in_db)
+                ogdata_dups = ogdata['id'].isin(current_ids_in_db)
 
-            images_data = [ID, date, footprint, hdfs] + files
-        except Exception as e:
-            print(e)
-            continue
-        metarecs.append(meta)
-        imagerecs.append(images_data)
+                 # remove dups before upload
+                indices = indices[~indices_dups]
+                meta = meta[~meta_dups]
+                imagedata = imagedata[~imagedata_dups]
+                ogdata = ogdata[~ogdata_dups]
 
-    metadf = pd.DataFrame(metarecs)
-    imagedf = gpd.GeoDataFrame(imagerecs, columns=filecolumns)
+            if all([indices.empty, meta.empty, imagedata.empty, ogdata.empty]):
+                raise Exception('All Tables are empty')
 
-    imagedf.to_sql('images', engine, schema='master', if_exists='append', index=False, dtype={'geom': Geometry('POLYGON', srid=4326)})
-    metadf.to_sql('image_attributes', engine, schema='master', if_exists='append', index=False)
+            if not indices_table.exists():
+                cursor.execute(indices_table.sql_schema())
+            if not meta_table.exists():
+                cursor.execute(meta_table.sql_schema())
+            if not imagedata_table.exists():
+                cursor.execute(imagedata_table.sql_schema())
+            if not ogdata_table.exists():
+                cursor.execute(ogdata_table.sql_schema())
 
+            indices = indices.to_csv(None, sep='\t', quotechar="'", header=False, index=False)
+            meta = meta.to_csv(None, sep='\t', quotechar="'", header=False, index=False)
+            imagedata = imagedata.to_csv(None, sep='\t', quotechar="'", header=False, index=False)
+            ogdata = ogdata.to_csv(None, sep='\t', quotechar="'", header=False, index=False)
+
+
+            cursor.copy_from(StringIO(indices), '{}.indices'.format(dataset), null="")
+            cursor.copy_from(StringIO(meta), '{}.meta'.format(dataset), null="")
+            cursor.copy_from(StringIO(imagedata), '{}.imagedata'.format(dataset), null="")
+            cursor.copy_from(StringIO(ogdata), '{}.original'.format(dataset), null="")
+
+        # indices_pk_create = 'ALTER TABLE {} NOCHECK CONSTRAINT MyConstraint; ALTER TABLE {}.indices ADD PRIMARY KEY (id);'.format(dataset)
+        # meta_pk_create = 'ALTER TABLE {}.meta ADD PRIMARY KEY (id);'.format(dataset)
+        # imagedata_pk_create = 'ALTER TABLE {}.imagedata ADD PRIMARY KEY (id);'.format(dataset)
+        # original_pk_create = 'ALTER TABLE {}.original ADD PRIMARY KEY (id);'.format(dataset)
+        # cursor.execute(indices_pk_create)
+        # cursor.execute(meta_pk_create)
+        # cursor.execute(imagedata_pk_create)
+        # cursor.execute(original_pk_create)
+
+        for column in index_columns:
+            if "geom" in column:
+                geo_index_create = 'CREATE INDEX IF NOT EXISTS idx_{}_indices_geom ON {}.indices USING gist({});'.format(dataset, dataset, column)
+                cursor.execute(geo_index_create)
+            if "time" in column:
+                time_index_create = 'CREATE INDEX IF NOT EXISTS ids_{}_indices_time ON {}.indices USING BTREE(time);'.format(dataset, dataset, column)
+                cursor.execute(time_index_create)
+
+        connection.commit()
+    except Exception as e:
+        connection.rollback()
+        raise Exception('*** ERROR - ROLLIING BACK CHANGES ***\n{}'.format(e))
+    finally:
+        cursor.close()
+        connection.close()
 
 func_map = {
-    'LANDSAT_8' : landsat_8_c1_to_sql,
-    'MASTER' : master_to_sql
+    'LANDSAT_8_C1' : landsat_8_c1_to_sql,
+    'MASTER' : serial_upload
 }
