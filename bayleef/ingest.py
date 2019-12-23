@@ -407,7 +407,7 @@ def themis_pairs(root, id1, id2):
 
     metadata['img2'] = {}
     metadata['img2']['rad'] = stats(img2rads)
-    metadata['img2']['tb'] = stats(img1bt)
+    metadata['img2']['tb'] = stats(img2bt)
     metadata['img2']['emission_angle'] = img2_campt['Emission'].value
     metadata['img2']['incidence_angle'] = img2_campt['Incidence'].value
     metadata['img2']['solar_lon'] = img2_campt['SolarLongitude'].value
